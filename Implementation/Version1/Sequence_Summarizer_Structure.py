@@ -31,7 +31,7 @@ class SequenceSummarizerStructure:
         index = ""
         value1 = ""
         for item in new_items:
-            result = sequence_summarizer_structure[item][1][1] & (sequence_summarizer_structure[item][1][0] ^ sequence_summarizer_structure[item][1][1]) # getting the changes
+            result = sequence_summarizer_structure.sequence_summarizer_table[item][1][1] & (sequence_summarizer_structure.sequence_summarizer_table[item][1][0] ^ sequence_summarizer_structure.sequence_summarizer_table[item][1][1]) # getting the changes
             if(result != 0):
                 if(cetablei.get(item) == None):
                     cetablei[item]={}
@@ -41,7 +41,7 @@ class SequenceSummarizerStructure:
                     value = result ^ value # Got set bit
                     value = int(floor(log(value,2)))
                     if(cetablei[item].get(value) == None):
-                        cetables[item][value]=0
+                        cetablei[item][value]=0
                     cetablei[item][value]=cetablei[item][value]+1
                     result = value1
         for item in new_items:

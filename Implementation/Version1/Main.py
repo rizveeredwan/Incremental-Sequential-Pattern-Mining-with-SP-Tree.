@@ -45,24 +45,24 @@ class Main:
             if(value == None):
                 #new sequence
                 self.seq_sum_dict[sid] = SequenceSummarizerStructure()
-                end_sp_tree_node = self.inc_sp_tree_root.Insert(self.pass_no, self.inc_sp_tree_root, processed_sequence, 0, 0, 0, self.seq_sum_dict[sid], 0, new_items)
-                self.seq_sum_dict[sid].sp_tree_end_node_ptr = end_sp_tree_node
-                self.seq_sum_dict[sid].UpdateCETables(new_items, self.cetables, self.seq_sum_dict[sid], -1)
-                self.seq_sum_dict[sid].last_event_no = len(processed_sequence)-1
-            else:
-                #old sequence
-                end_sp_tree_node = self.inc_sp_tree_root.Insert(self.pass_no, value.sp_tree_end_node_ptr , processed_sequence, 0, 0, value.last_event_no+1, value, 0, new_items)
-                value.sp_tree_end_node_ptr = end_sp_tree_node
-                value.UpdateCETablei(new_items, self.cetablei, value)
-                value.last_event_no = value.last_event_no + len(processed_sequence)
+                self.seq_sum_dict[sid].sp_tree_end_node_ptr = self.inc_sp_tree_root
+                self.seq_sum_dict[sid].last_event_no = -1
+                value = self.seq_sum_dict[sid]
+            end_sp_tree_node = self.inc_sp_tree_root.Insert(self.pass_no, value.sp_tree_end_node_ptr , processed_sequence, 0, 0, value.last_event_no, value, 0, new_items)
+            value.sp_tree_end_node_ptr = end_sp_tree_node
+            value.UpdateCETables(new_items, self.cetables, value, value.last_event_no)
+            value.UpdateCETablei(new_items, self.cetablei, value)
+            value.last_event_no = value.last_event_no + len(processed_sequence)
+            self.inc_sp_tree_root.UpdatePath(end_sp_tree_node, self.pass_no, {})
         print("completed")
-
 
 sys.stdin = open('input.txt','r')
 #sys.stdout = open('output.txt','w')
 
 main = Main()
 main.DatabaseInput()
+
+#pass will start with 1
 
 """
 value = 1<<65789
