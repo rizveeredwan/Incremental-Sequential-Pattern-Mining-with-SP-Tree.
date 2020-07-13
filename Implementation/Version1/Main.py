@@ -1,4 +1,5 @@
 import sys
+from math import log,floor
 
 from INC_SP_Tree import INC_SP_Tree
 from BPFSP_Tree import BPFSP_Tree
@@ -10,6 +11,8 @@ class Main:
         self.seq_sum_dict={}
         self.pass_no = 0
         self.inc_sp_tree_root = INC_SP_Tree()
+        self.cetables={}
+        self.cetablei={}
 
     def ProcessSequence(self,line):
         line = line.strip().split(' ')
@@ -44,18 +47,29 @@ class Main:
                 self.seq_sum_dict[sid] = SequenceSummarizerStructure()
                 end_sp_tree_node = self.inc_sp_tree_root.Insert(self.pass_no, self.inc_sp_tree_root, processed_sequence, 0, 0, 0, self.seq_sum_dict[sid], 0, new_items)
                 self.seq_sum_dict[sid].sp_tree_end_node_ptr = end_sp_tree_node
+                self.seq_sum_dict[sid].UpdateCETables(new_items, self.cetables, self.seq_sum_dict[sid], -1)
                 self.seq_sum_dict[sid].last_event_no = len(processed_sequence)-1
             else:
                 #old sequence
                 end_sp_tree_node = self.inc_sp_tree_root.Insert(self.pass_no, value.sp_tree_end_node_ptr , processed_sequence, 0, 0, value.last_event_no+1, value, 0, new_items)
                 value.sp_tree_end_node_ptr = end_sp_tree_node
+                value.UpdateCETablei(new_items, self.cetablei, value)
                 value.last_event_no = value.last_event_no + len(processed_sequence)
+        print("completed")
+
 
 sys.stdin = open('input.txt','r')
 #sys.stdout = open('output.txt','w')
 
 main = Main()
 main.DatabaseInput()
+
+"""
+value = 1<<65789
+bit_position = int(floor(log(value,2)))
+print(bit_position)
+"""
+
 #value  = 1<<100000
 #print(value)
 #print(value - 1)
