@@ -127,6 +127,7 @@ class INC_SP_Tree:
         new_node = ""
         failed_nodes=[]
         modified_nodes=[]
+        new_created_nodes=[]
         for i in range(0,len(node_list)):
             list = node_list[i].next_link.get(item)
             if(list != None):
@@ -137,6 +138,8 @@ class INC_SP_Tree:
                         if(new_node.event_no>node_list[i].event_no):
                             actual_support = actual_support + new_node.present_count - new_node.previous_count
                             modified_nodes.append(new_node)
+                            if(new_node.created_at == pass_no):
+                                new_created_nodes.append(new_node)
                         else:
                             failed_nodes.append(new_node)
         if(over_support < minimum_support_threshold):
@@ -144,11 +147,16 @@ class INC_SP_Tree:
         for i in range(0,len(failed_nodes)):
             list = failed_nodes[i].next_link.get(item)
             if(list != None):
-                if(failed_nodes[i].modified_at == pass_no):
-                    actual_support = actual_support + failed_nodes[i].present_count - failed_nodes[i].previous_count
-                    modified_nodes.append(failed_nodes[i])
-        return over_support, actual_support, modified_nodes
-
+                for j in range(0,len(list)):
+                    if(list[j].modified_at == pass_no):
+                        actual_support = actual_support + list[j].present_count - list[j].previous_count
+                        modified_nodes.append(list[j])
+                        if(list[j].created_at == pass_no):
+                            new_created_nodes.append(list[j])
+        return over_support, actual_support, modified_nodes, new_created_nodes
+        
+    def SequenceExtensionForUnmodifiedPart(self):
+        pass
 
     def ItemsetExtensionNormal(self, node_list, item, minimum_support_threshold, pass_no, last_event_item_bitset, current_maximum_support):
         #last event item bitset - all the previous items bitset representation
@@ -192,6 +200,7 @@ class INC_SP_Tree:
         actual_support = current_support
         list = []
         modified_nodes = []
+        new_created_nodes = []
         q=Queue()
         for i in range(0,len(node_list)):
             list = node_list[i].next_link.get(item)
@@ -201,6 +210,8 @@ class INC_SP_Tree:
                         actual_support = actual_support + list[j].present_count - list[j].previous_count
                         if(list[j].event_no ==  node_list[i].event_no):
                             modified_nodes.append(list[j])
+                            if(list[j].created_at == pass_no):
+                                new_created_nodes.append(list[j])
                         else:
                             q.put(list[j])
         if(actual_support < minimum_support_threshold):
@@ -215,11 +226,13 @@ class INC_SP_Tree:
                     actual_support = actual_support + list[i].present_count - list[i].previous_count
                     if((list[i].parent_item_bitset & last_event_item_bitset) == 0):
                         modified_nodes.append(list[i])
+                        if(list[i].created_at == pass_no):
+                            new_created_nodes.append(list[i])
                     else:
                         q.put(list[i])
             if(actual_support < minimum_support_threshold):
                 return actual_support, next_level_nodes
-        return actual_support, modified_nodes
+        return actual_support, modified_nodes, new_created_nodes
 
     def IncrementalTreeMiner(self, modified_node_list, pattern, last_event_item_bitset, s_list, i_list, bpfsptree_node, cetables, cetablei, minimum_support_threshold, pass_no):
         actual_support, over_support = 0,0
@@ -243,7 +256,10 @@ class INC_SP_Tree:
                         # update the existing frequency only
                         bpfsptree_node.freq_seq_ex_child_nodes[s_list[i]].support = actual_support
                         # saving the nodes for future extension
-                        sequence_extended_modified_sp_tree_nodes[s_list[i]] = modified_nodes
+                        if(len(modified_nodes)>0):
+                            sequence_extended_modified_sp_tree_nodes[s_list[i]] = modified_nodes
+
+
                     else:
                         # put the support in non frequent list
                         bpfsptree_node.non_freq_seq_ex_support[s_list[i]] = actual_support
