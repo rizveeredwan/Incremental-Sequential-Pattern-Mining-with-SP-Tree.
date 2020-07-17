@@ -1,8 +1,6 @@
 # Sequence Summarizer Class
 from math import log,floor
 
-from INC_SP_Tree import INC_SP_Tree
-
 class SequenceSummarizerStructure:
     def __init__(self):
         self.sp_tree_end_node_ptr=""
