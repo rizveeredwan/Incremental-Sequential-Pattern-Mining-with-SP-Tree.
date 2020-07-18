@@ -3,6 +3,8 @@ from BPFSP_Tree import BPFSP_Tree, RecursiveExtensionEndLinkedListPtr
 from math import log, floor
 from collections import deque
 
+current_recursive_extension_end_linked_list_ptr = ""
+
 class ItemEventCombination:
     def __init__(self,item,event):
         self.item = item
@@ -387,8 +389,36 @@ class INC_SP_Tree_Functionalities:
         current_recursive_extension_end_linked_list_ptr.next_list_ptr = new_recursive_extension_end_linked_list_ptr
         return new_recursive_extension_end_linked_list_ptr
 
+    def PruningBPFSPBranchFromBottom(self, bpfsptree_node, minimum_support_threshold, recursive_extension_end_linked_list_ptr):
+        if(bpfsptree_node.support >= minimum_support_threshold):
+            if(len(bpfsptree_node.freq_seq_ex_child_nodes) > 0 or len(bpfsptree_node.freq_item_ex_child_nodes) > 0 ):
+                recursive_extension_end_linked_list_ptr.previous_list_ptr.next_list_ptr = recursive_extension_end_linked_list_ptr.next_list_ptr
+                del recursive_extension_end_linked_list_ptr
+                return
+            else:
+                # has become an end node
+                recursive_extension_end_linked_list_ptr.bpfsptree_node_ptr = bpfsptree_node
+                bpfsptree_node.recursive_extension_end_linked_list_ptr = recursive_extension_end_linked_list_ptr
+                return 
+        else:
+            if(bpfsptree_node.parent_node != None):
+                # not root
+                # removing from parent node
+                if(bpfsptree_node.connection_type_with_parent == True):
+                    del bpfsptree_node.parent_node.freq_seq_ex_child_nodes[bpfsptree_node.item]
+                elif(bpfsptree_node.connection_type_with_parent == False):
+                    del bpfsptree_node.parent_node.freq_item_ex_child_nodes[bpfsptree_node.item]
+                self.PruningBPFSPBranchFromBottom(bpfsptree_node.parent_node, minimum_support_threshold, recursive_extension_end_linked_list_ptr)
+                return
+            else:
+                # root
+                recursive_extension_end_linked_list_ptr.previous_list_ptr.next_list_ptr = recursive_extension_end_linked_list_ptr.next_list_ptr
+                del recursive_extension_end_linked_list_ptr
+                return
 
-    def IncrementalTreeMiner(self, modified_node_list, pattern, last_event_item_bitset, s_list, i_list, bpfsptree_node, cetables, cetablei, minimum_support_threshold, pass_no, current_recursive_extension_end_linked_list_ptr):
+    def IncrementalTreeMiner(self, modified_node_list, pattern, last_event_item_bitset, s_list, i_list, bpfsptree_node, cetables, cetablei, minimum_support_threshold, pass_no):
+        global current_recursive_extension_end_linked_list_ptr
+
         actual_support, over_support,over_support1, complete_over_support = 0,0,0,0
         sequence_extended_modified_sp_tree_nodes={}
         itemset_extended_modified_sp_tree_nodes={}
@@ -456,6 +486,7 @@ class INC_SP_Tree_Functionalities:
 
                             # create a new branch
                             bpfsptree_node.freq_seq_ex_child_nodes[symbol] = BPFSP_Tree()
+                            bpfsptree_node.freq_seq_ex_child_nodes[symbol].connection_type_with_parent = True # Sequence extension
                             bpfsptree_node.freq_seq_ex_child_nodes[symbol].parent_node = bpfsptree_node
                             bpfsptree_node.freq_seq_ex_child_nodes[symbol].item = symbol
                             bpfsptree_node.freq_seq_ex_child_nodes[symbol].support = actual_support
@@ -513,6 +544,7 @@ class INC_SP_Tree_Functionalities:
                             bpfsptree_node.freq_seq_ex_child_nodes[symbol] = BPFSP_Tree()
                             bpfsptree_node.freq_seq_ex_child_nodes[symbol].parent_node = bpfsptree_node
                             bpfsptree_node.freq_seq_ex_child_nodes[symbol].item = symbol
+                            bpfsptree_node.freq_seq_ex_child_nodes[symbol].connection_type_with_parent = True # Sequence extension
                             bpfsptree_node.freq_seq_ex_child_nodes[symbol].support = actual_support
                             bpfsptree_node.freq_seq_ex_child_nodes[symbol].projection_nodes = next_level_nodes
 
@@ -598,6 +630,7 @@ class INC_SP_Tree_Functionalities:
                                 bpfsptree_node.freq_item_ex_child_nodes[symbol].parent_node = bpfsptree_node
                                 bpfsptree_node.freq_item_ex_child_nodes[symbol].item = symbol
                                 bpfsptree_node.freq_item_ex_child_nodes[symbol].support = actual_support
+                                bpfsptree_node.freq_seq_ex_child_nodes[symbol].connection_type_with_parent = False # Itemset extension
 
                                 # getting the previous unmodified nodes from the parent node's unmodifed nodes
                                 if(unmodified_node_list_calculated == False):
@@ -642,6 +675,7 @@ class INC_SP_Tree_Functionalities:
                                 bpfsptree_node.freq_item_ex_child_nodes[symbol].item = symbol
                                 bpfsptree_node.freq_item_ex_child_nodes[symbol].support = actual_support
                                 bpfsptree_node.freq_item_ex_child_nodes[symbol].projection_nodes = next_level_nodes
+                                bpfsptree_node.freq_seq_ex_child_nodes[symbol].connection_type_with_parent = False # Itemset extension
 
                                 #saving the nodes for further extension
                                 itemset_extended_modified_sp_tree_nodes[symbol] = modified_nodes
@@ -675,8 +709,7 @@ class INC_SP_Tree_Functionalities:
             if(bpfsptree_node.recursive_extension_end_linked_list_ptr == None):
                 # need to create the end linked list pointer
                 current_recursive_extension_end_linked_list_ptr = self.CreateNeRecursiveExtensionEndListPtr(current_recursive_extension_end_linked_list_ptr, bpfsptree_node)
-
-                # completed all the works 
+                # completed all the works
 
         # Recursive Extension
         # sequence Extension

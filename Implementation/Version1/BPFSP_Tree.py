@@ -4,6 +4,7 @@ class BPFSP_Tree:
         self.parent_node=""
         self.item=""
         self.support=0
+        self.connection_type_with_parent = None
 
         self.projection_nodes=[]
 
