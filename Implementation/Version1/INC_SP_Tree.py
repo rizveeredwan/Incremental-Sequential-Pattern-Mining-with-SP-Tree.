@@ -399,7 +399,7 @@ class INC_SP_Tree_Functionalities:
                 # has become an end node
                 recursive_extension_end_linked_list_ptr.bpfsptree_node_ptr = bpfsptree_node
                 bpfsptree_node.recursive_extension_end_linked_list_ptr = recursive_extension_end_linked_list_ptr
-                return 
+                return
         else:
             if(bpfsptree_node.parent_node != None):
                 # not root
@@ -415,6 +415,20 @@ class INC_SP_Tree_Functionalities:
                 recursive_extension_end_linked_list_ptr.previous_list_ptr.next_list_ptr = recursive_extension_end_linked_list_ptr.next_list_ptr
                 del recursive_extension_end_linked_list_ptr
                 return
+
+    def BPFSPSubTreePruning(self, bpfsptree_node):
+        for key in bpfsptree_node.freq_seq_ex_child_nodes:
+            self.BPFSPSubTreePruning(bpfsptree_node.freq_seq_ex_child_nodes[key])
+        del bpfsptree_node.freq_seq_ex_child_nodes
+        for key in bpfsptree_node.freq_item_ex_child_nodes:
+            self.BPFSPSubTreePruning(bpfsptree_node.freq_item_ex_child_nodes[key])
+        del bpfsptree_node.freq_item_ex_child_nodes
+        if(bpfsptree_node.recursive_extension_end_linked_list_ptr != None):
+            # it was an end node before
+            bpfsptree_node.recursive_extension_end_linked_list_ptr.previous_list_ptr.next_list_ptr = bpfsptree_node.recursive_extension_end_linked_list_ptr.next_list_ptr
+            del bpfsptree_node.recursive_extension_end_linked_list_ptr
+        del bpfsptree_node
+        return
 
     def IncrementalTreeMiner(self, modified_node_list, pattern, last_event_item_bitset, s_list, i_list, bpfsptree_node, cetables, cetablei, minimum_support_threshold, pass_no):
         global current_recursive_extension_end_linked_list_ptr
@@ -473,7 +487,9 @@ class INC_SP_Tree_Functionalities:
                         if(checked_all == True):
                             bpfsptree_node.non_freq_seq_ex_support[symbol] = actual_support
                         # need to prune a branch
-                        pass
+                        self.BPFSPSubTreePruning(bpfsptree_node.freq_seq_ex_child_nodes[symbol])
+                        del bpfsptree_node.freq_seq_ex_child_nodes[symbol]
+                        # completed all the works
                 else:
                     # new pattern for which no branch in BPFSP Tree encountered
                     if(bpfsptree_node.non_freq_seq_ex_support.get(symbol) != None):
@@ -567,7 +583,9 @@ class INC_SP_Tree_Functionalities:
                 # Extension is not possible with this item
                 if(bpfsptree_node.freq_seq_ex_child_nodes.get(symbol) != None):
                     # Need to remove the pattern from the tree
-                    pass
+                    self.BPFSPSubTreePruning(bpfsptree_node.freq_seq_ex_child_nodes[symbol])
+                    del bpfsptree_node.freq_seq_ex_child_nodes[symbol]
+                    # completed all the works
                 else:
                     # not in the tree
                     if(bpfsptree_node.non_freq_seq_ex_support.get(symbol) != None):
@@ -615,7 +633,9 @@ class INC_SP_Tree_Functionalities:
                             if(checked_all == True):
                                 bpfsptree_node.non_freq_item_ex_support[symbol] = actual_support
                             # pruning a subtree
-                            pass
+                            self.BPFSPSubTreePruning(bpfsptree_node.freq_item_ex_child_nodes[symbol])
+                            del bpfsptree_node.freq_item_ex_child_nodes[symbol]
+                            # completed all the works
                     else:
                         # not in the frequent pattern tree
                         if(bpfsptree_node.non_freq_item_ex_support.get(symbol) != None):
@@ -688,7 +708,9 @@ class INC_SP_Tree_Functionalities:
                     # no need to check for itemset extension
                     if(bpfsptree_node.freq_item_ex_child_nodes.get(symbol) != None):
                         # need to prune a subtree from BPFSP Tree
-                        pass
+                        self.BPFSPSubTreePruning(bpfsptree_node.freq_item_ex_child_nodes[symbol])
+                        del bpfsptree_node.freq_item_ex_child_nodes[symbol]
+                        # completed all the works
                     else:
                         if(bpfsptree_node.non_freq_item_ex_support.get(symbol) != None):
                             del bpfsptree_node.non_freq_item_ex_support[symbol]
@@ -729,3 +751,17 @@ class INC_SP_Tree_Functionalities:
                     new_i_list.appendleft(value)
                     break
             self.IncrementalTreeMiner(itemset_extended_modified_sp_tree_nodes[key], pattern[len(pattern)-1].append(key), last_event_item_bitset | 1<< key, new_s_list, new_i_list, bpfsptree_node.freq_item_ex_child_nodes[key], cetables, cetablei, minimum_support_threshold, pass_no)
+
+    def InitiateRemovingFromBottom(self, recursive_extension_end_linked_list_ptr, minimum_support_threshold):
+        # the root starter will be sent: so start from the next
+        while True:
+            recursive_extension_end_linked_list_ptr = recursive_extension_end_linked_list_ptr.next_list_ptr
+            if(recursive_extension_end_linked_list_ptr == None):
+                break # completed all the checking
+            if(recursive_extension_end_linked_list_ptr.bpfsptree_node_ptr.support >= minimum_support_threshold):
+                continue
+            else:
+                save_next = recursive_extension_end_linked_list_ptr.next_list_ptr
+                self.PruningBPFSPBranchFromBottom(recursive_extension_end_linked_list_ptr.bpfsptree_node_ptr, minimum_support_threshold, recursive_extension_end_linked_list_ptr )
+                recursive_extension_end_linked_list_ptr = save_next
+        return
