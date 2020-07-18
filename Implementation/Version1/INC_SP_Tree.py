@@ -1,5 +1,5 @@
 from queue import Queue
-from BPFSP_Tree import BPFSP_Tree
+from BPFSP_Tree import BPFSP_Tree, RecursiveExtensionEndLinkedListPtr
 from math import log, floor
 from collections import deque
 
@@ -372,7 +372,23 @@ class INC_SP_Tree_Functionalities:
         return unmodified_node_list
 
 
-    def IncrementalTreeMiner(self, modified_node_list, pattern, last_event_item_bitset, s_list, i_list, bpfsptree_node, cetables, cetablei, minimum_support_threshold, pass_no):
+    def AdjustRecursiveExtensionEndListPtr(self, bpfsptree_node):
+        recursive_extension_end_linked_list_ptr = bpfsptree_node.recursive_extension_end_linked_list_ptr
+        recursive_extension_end_linked_list_ptr.previous_list_ptr.next_list_ptr = recursive_extension_end_linked_list_ptr.next_list_ptr
+        del bpfsptree_node.recursive_extension_end_linked_list_ptr
+        return
+
+    def CreateNeRecursiveExtensionEndListPtr(self, current_recursive_extension_end_linked_list_ptr, bpfsptree_node):
+        new_recursive_extension_end_linked_list_ptr = RecursiveExtensionEndLinkedListPtr()
+        new_recursive_extension_end_linked_list_ptr.bpfsptree_node_ptr = bpfsptree_node
+        new_recursive_extension_end_linked_list_ptr.previous_list_ptr = current_recursive_extension_end_linked_list_ptr
+        new_recursive_extension_end_linked_list_ptr.next_list_ptr = None
+
+        current_recursive_extension_end_linked_list_ptr.next_list_ptr = new_recursive_extension_end_linked_list_ptr
+        return new_recursive_extension_end_linked_list_ptr
+
+
+    def IncrementalTreeMiner(self, modified_node_list, pattern, last_event_item_bitset, s_list, i_list, bpfsptree_node, cetables, cetablei, minimum_support_threshold, pass_no, current_recursive_extension_end_linked_list_ptr):
         actual_support, over_support,over_support1, complete_over_support = 0,0,0,0
         sequence_extended_modified_sp_tree_nodes={}
         itemset_extended_modified_sp_tree_nodes={}
@@ -647,6 +663,20 @@ class INC_SP_Tree_Functionalities:
                             # non frequent, non in TLB also, nothing to do
                             # completed all the works
                             pass
+
+        if(len(bpfsptree_node.freq_seq_ex_child_nodes) > 0 or len(bpfsptree_node.freq_item_ex_child_nodes) > 0):
+            # this node is not end of recursive extension
+            if(bpfsptree_node.recursive_extension_end_linked_list_ptr != None):
+                # it was an end previously - need to remove it
+                self.AdjustRecursiveExtensionEndListPtr(bpfsptree_node)
+                # completed all the works
+        else:
+            # this is the end of recursive extension
+            if(bpfsptree_node.recursive_extension_end_linked_list_ptr == None):
+                # need to create the end linked list pointer
+                current_recursive_extension_end_linked_list_ptr = self.CreateNeRecursiveExtensionEndListPtr(current_recursive_extension_end_linked_list_ptr, bpfsptree_node)
+
+                # completed all the works 
 
         # Recursive Extension
         # sequence Extension

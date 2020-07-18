@@ -12,3 +12,12 @@ class BPFSP_Tree:
 
         self.non_freq_seq_ex_support={}
         self.non_freq_item_ex_support={}
+
+        self.recursive_extension_end_linked_list_ptr=None
+
+# Recursive Extension End Linked List Pointer
+class RecursiveExtensionEndLinkedListPtr:
+    def __init__(self):
+        self.bpfsptree_node_ptr=""
+        self.previous_list_ptr=""
+        self.next_list_ptr=""
