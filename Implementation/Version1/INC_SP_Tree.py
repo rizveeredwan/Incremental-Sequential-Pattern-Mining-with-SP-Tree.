@@ -1,5 +1,7 @@
 from queue import Queue
 from BPFSP_Tree import BPFSP_Tree
+from math import log, floor
+from collections import deque
 
 class ItemEventCombination:
     def __init__(self,item,event):
@@ -389,131 +391,141 @@ class INC_SP_Tree_Functionalities:
         heuristic_s_list_wise_i_list_pruning = {}
 
         # sequence extension
-        for i in range(0,len(s_list)):
+        new_s_list = deque()
+        i_list_from_s_list = deque()
+        while len(s_list) > 0 :
+            symbol = s_list.popleft()
             verdict = True
             for j in range(0,len(len(pattern)-1)):
-                if(cetables.get(pattern[len(pattern)-1][j]) == None or cetables[pattern[len(pattern)-1][j]][s_list[i]] < minimum_support_threshold):
+                if(cetables.get(pattern[len(pattern)-1][j]) == None or cetables[pattern[len(pattern)-1][j]][symbol] < minimum_support_threshold):
                     # CEtables violation
                     verdict = False
                     break
 
             if(verdict == True):
-                if(bpfsptree_node.freq_seq_ex_child_nodes.get(s_list[i]) != None):
+                if(bpfsptree_node.freq_seq_ex_child_nodes.get(symbol) != None):
                     # already pattern in the tree , update the frequency and take decision
-                    over_support, actual_support, complete_over_support, new_created_nodes, modified_nodes, checked_all  =  self.SequenceExtensionIncremental(modified_node_list, s_list[i], minimum_support_threshold, pass_no, bpfsptree_node.freq_seq_ex_child_nodes[s_list[i]].support )
+                    over_support, actual_support, complete_over_support, new_created_nodes, modified_nodes, checked_all  =  self.SequenceExtensionIncremental(modified_node_list, symbol, minimum_support_threshold, pass_no, bpfsptree_node.freq_seq_ex_child_nodes[symbol].support )
 
                     if(actual_support >= minimum_support_threshold):
                         # previously frequent and again frequent
                         # update the existing frequency only
-                        bpfsptree_node.freq_seq_ex_child_nodes[s_list[i]].support = actual_support
+                        bpfsptree_node.freq_seq_ex_child_nodes[symbol].support = actual_support
                         # saving the nodes for future extension
                         if(len(modified_nodes)>0):
-                            sequence_extended_modified_sp_tree_nodes[s_list[i]] = modified_nodes
+                            sequence_extended_modified_sp_tree_nodes[symbol] = modified_nodes
+                            new_s_list.append(symbol)
+                            i_list_from_s_list.append(symbol)
+
                         # saving the newly created nodes in the BPFSP Tree
                         for j in range(0,len(new_created_nodes)):
-                            bpfsptree_node.freq_seq_ex_child_nodes[s_list[i]].projection_nodes.append(new_created_nodes[j])
+                            bpfsptree_node.freq_seq_ex_child_nodes[symbol].projection_nodes.append(new_created_nodes[j])
                         # completed all the works
 
                     else:
                         # put the support in non frequent list
                         if(checked_all == True):
-                            bpfsptree_node.non_freq_seq_ex_support[s_list[i]] = actual_support
+                            bpfsptree_node.non_freq_seq_ex_support[symbol] = actual_support
                         # need to prune a branch
                         pass
                 else:
                     # new pattern for which no branch in BPFSP Tree encountered
-                    if(bpfsptree_node.non_freq_seq_ex_support.get(s_list[i]) != None):
+                    if(bpfsptree_node.non_freq_seq_ex_support.get(symbol) != None):
                         # already have the previous frequency in the existing tree  - updating for the new part
-                        over_support, actual_support, complete_over_support, new_created_nodes, modified_nodes, checked_all =  self.SequenceExtensionIncremental(modified_node_list, s_list[i], minimum_support_threshold, pass_no, bpfsptree_node.non_freq_seq_ex_support[s_list[i]])
+                        over_support, actual_support, complete_over_support, new_created_nodes, modified_nodes, checked_all =  self.SequenceExtensionIncremental(modified_node_list, symbol, minimum_support_threshold, pass_no, bpfsptree_node.non_freq_seq_ex_support[symbol])
 
                         if(actual_support >= minimum_support_threshold):
                             # need to remove from the non frequent part
-                            del bpfsptree_node.non_freq_seq_ex_support[s_list[i]]
+                            del bpfsptree_node.non_freq_seq_ex_support[symbol]
 
                             # create a new branch
-                            bpfsptree_node.freq_seq_ex_child_nodes[s_list[i]] = BPFSP_Tree()
-                            bpfsptree_node.freq_seq_ex_child_nodes[s_list[i]].parent_node = bpfsptree_node
-                            bpfsptree_node.freq_seq_ex_child_nodes[s_list[i]].item = s_list[i]
-                            bpfsptree_node.freq_seq_ex_child_nodes[s_list[i]].support = actual_support
+                            bpfsptree_node.freq_seq_ex_child_nodes[symbol] = BPFSP_Tree()
+                            bpfsptree_node.freq_seq_ex_child_nodes[symbol].parent_node = bpfsptree_node
+                            bpfsptree_node.freq_seq_ex_child_nodes[symbol].item = symbol
+                            bpfsptree_node.freq_seq_ex_child_nodes[symbol].support = actual_support
 
                             # getting the previous unmodified nodes from the parent node's unmodifed nodes
                             if(unmodified_node_list_calculated == False):
                                 # if unmodified_node_list not calculate first calculate it
                                 unmodified_node_list = self.GettingUnmodifiedNodes(bpfsptree_node, pass_no)
                                 unmodified_node_list_calculated = True
-                            over_support1, unmodified_nodes_for_extension = self.SequenceExtensionForUnmodifiedPart(unmodified_node_list, s_list[i])
+                            over_support1, unmodified_nodes_for_extension = self.SequenceExtensionForUnmodifiedPart(unmodified_node_list, symbol)
 
                             # saving the projection unmodified nodes in BPFSP Tree
                             for j in range(0, len(unmodified_nodes_for_extension)):
-                                bpfsptree_node.freq_seq_ex_child_nodes[s_list[i]].projection_nodes.append(unmodified_nodes_for_extension[j])
+                                bpfsptree_node.freq_seq_ex_child_nodes[symbol].projection_nodes.append(unmodified_nodes_for_extension[j])
 
                             # getting the unmodified nodes from parent node's modified section
                             over_support2, unmodified_nodes_for_extension = self.SequenceExtensionFromModifiedToUnmodified(self, modified_node_list, item, pass_no)
 
                             # saving the projection unmodified nodes from modified nodes in BPFSP Tree
                             for j in range(0,len(unmodified_nodes_for_extension)):
-                                bpfsptree_node.freq_seq_ex_child_nodes[s_list[i]].projection_nodes.append(unmodified_nodes_for_extension[j])
+                                bpfsptree_node.freq_seq_ex_child_nodes[symbol].projection_nodes.append(unmodified_nodes_for_extension[j])
 
                             # saving the projection new nodes in in BPFSP Tree
                             for j in range(0, len(new_created_nodes)):
-                                bpfsptree_node.freq_seq_ex_child_nodes[s_list[i]].projection_nodes.append(new_created_nodes[j])
+                                bpfsptree_node.freq_seq_ex_child_nodes[symbol].projection_nodes.append(new_created_nodes[j])
 
                             # saving the modified nodes for future extension
-                            sequence_extended_modified_sp_tree_nodes[s_list[i]] = modified_nodes
+                            sequence_extended_modified_sp_tree_nodes[symbol] = modified_nodes
+                            new_s_list.append(symbol)
+                            i_list_from_s_list.append(symbol)
 
                             # as we have complete over support
                             # over support from (modified to modified),(unmodified to unmodified),(modified to unmodified)
                             over_support = complete_over_support + over_support1 + over_support2
                             if(over_support < minimum_support_threshold):
                                 # heuristic i list pruning applied
-                                heuristic_s_list_wise_i_list_pruning[s_list[i]] = True
+                                heuristic_s_list_wise_i_list_pruning[symbol] = True
 
                             # completed all the works
 
                         else:
                             # updating with the new frequency - might change or not (still non frequent)
                             if(checked_all == True):
-                                bpfsptree_node.non_freq_seq_ex_support[s_list[i]] = actual_support
+                                bpfsptree_node.non_freq_seq_ex_support[symbol] = actual_support
                             else:
-                                del bpfsptree_node.non_freq_seq_ex_support[s_list[i]]
+                                del bpfsptree_node.non_freq_seq_ex_support[symbol]
                             # completed all the works
                     else:
                         # completely new item
-                        over_support, actual_support, next_level_nodes, modified_nodes, checked_all = self.SequenceExtensionNormal(bpfsptree_node.projection_nodes, s_list[i], minimum_support_threshold, pass_no, bpfsptree_node.support)
+                        over_support, actual_support, next_level_nodes, modified_nodes, checked_all = self.SequenceExtensionNormal(bpfsptree_node.projection_nodes, symbol, minimum_support_threshold, pass_no, bpfsptree_node.support)
 
                         if(actual_support >= minimum_support_threshold):
 
                             # create a new branch
-                            bpfsptree_node.freq_seq_ex_child_nodes[s_list[i]] = BPFSP_Tree()
-                            bpfsptree_node.freq_seq_ex_child_nodes[s_list[i]].parent_node = bpfsptree_node
-                            bpfsptree_node.freq_seq_ex_child_nodes[s_list[i]].item = s_list[i]
-                            bpfsptree_node.freq_seq_ex_child_nodes[s_list[i]].support = actual_support
-                            bpfsptree_node.freq_seq_ex_child_nodes[s_list[i]].projection_nodes = next_level_nodes
+                            bpfsptree_node.freq_seq_ex_child_nodes[symbol] = BPFSP_Tree()
+                            bpfsptree_node.freq_seq_ex_child_nodes[symbol].parent_node = bpfsptree_node
+                            bpfsptree_node.freq_seq_ex_child_nodes[symbol].item = symbol
+                            bpfsptree_node.freq_seq_ex_child_nodes[symbol].support = actual_support
+                            bpfsptree_node.freq_seq_ex_child_nodes[symbol].projection_nodes = next_level_nodes
 
                             # saving the nodes for future extension
-                            sequence_extended_modified_sp_tree_nodes[s_list[i]] = modified_nodes
+                            sequence_extended_modified_sp_tree_nodes[symbol] = modified_nodes
+                            new_s_list.append(symbol)
+                            i_list_from_s_list.append(symbol)
 
                             # calculated over complete tree - valid over support
                             if(over_support < minimum_support_threshold):
-                                heuristic_s_list_wise_i_list_pruning[s_list[i]] = True
+                                heuristic_s_list_wise_i_list_pruning[symbol] = True
 
                             # completed all the works
                         else:
                             # save in the TLB
                             if(checked_all == True):
-                                bpfsptree_node.non_freq_seq_ex_support[s_list[i]] = actual_support
+                                bpfsptree_node.non_freq_seq_ex_support[symbol] = actual_support
                             # completed all the works
             else:
                 # Extension is not possible with this item
-                if(bpfsptree_node.freq_seq_ex_child_nodes.get(s_list[i]) != None):
+                if(bpfsptree_node.freq_seq_ex_child_nodes.get(symbol) != None):
                     # Need to remove the pattern from the tree
                     pass
                 else:
                     # not in the tree
-                    if(bpfsptree_node.non_freq_seq_ex_support.get(s_list[i]) != None):
+                    if(bpfsptree_node.non_freq_seq_ex_support.get(symbol) != None):
                         # in the TLB
                         # removing from there
-                        del bpfsptree_node.non_freq_seq_ex_support[s_list[i]]
+                        del bpfsptree_node.non_freq_seq_ex_support[symbol]
                         # there was also a way not doing now: checking if there was modification beneath it
                         # completed all the works
                     else:
@@ -522,109 +534,135 @@ class INC_SP_Tree_Functionalities:
                         pass
 
         #item set extension
-        for i in range(0, len(i_list)):
+        new_i_list = deque()
+        while len(i_list)>0:
+            symbol = i_list.popleft()
             # heuristic i list checking
-            if(heuristic_s_list_wise_i_list_pruning.get(i_list[i]) == None):
+            if(heuristic_s_list_wise_i_list_pruning.get(symbol) == None):
                 # cetable i pruning
                 verdict = True
                 for j in range(0,len(pattern[len(pattern)-1])):
-                    if(cetablei[i_list[i]].get(pattern[len(pattern)-1][j]) == None or  cetablei[i_list[i]][pattern[len(pattern)-1][j]] < minimum_support_threshold):
+                    if(cetablei[symbol].get(pattern[len(pattern)-1][j]) == None or  cetablei[symbol][pattern[len(pattern)-1][j]] < minimum_support_threshold):
                         verdict = False
                         break
                 if(verdict == True):
                     # need to check for itemset extension
-                    if(bpfsptree_node.freq_item_ex_child_nodes.get(i_list[i]) != None):
+                    if(bpfsptree_node.freq_item_ex_child_nodes.get(symbol) != None):
                         # already in the frequent pattern tree
-                        actual_support, modified_nodes, new_created_nodes, checked_all = self.ItemsetExtensionIncremental(modified_node_list, i_list[i], minimum_support_threshold, pass_no, last_event_item_bitset, bpfsptree_node.freq_item_ex_child_nodes[i_list[i]].support)
+                        actual_support, modified_nodes, new_created_nodes, checked_all = self.ItemsetExtensionIncremental(modified_node_list, symbol, minimum_support_threshold, pass_no, last_event_item_bitset, bpfsptree_node.freq_item_ex_child_nodes[symbol].support)
                         if(actual_support >= minimum_support_threshold):
                             # already frequent. Update the new frequency
-                            bpfsptree_node.freq_item_ex_child_nodes[i_list[i]].support = actual_support
+                            bpfsptree_node.freq_item_ex_child_nodes[symbol].support = actual_support
                             # keeping the modified nodes for further extension
                             if(len(modified_nodes) > 0):
-                                itemset_extended_modified_sp_tree_nodes[i_list[i]]= modified_nodes
+                                itemset_extended_modified_sp_tree_nodes[symbol]= modified_nodes
+                                new_i_list.append(symbol)
                             # updating the BPFSP Tree with new nodes
                             for j in range(0,len(new_created_nodes)):
-                                bpfsptree_node.freq_item_ex_child_nodes[i_list[i]].projection_nodes.append(new_created_nodes[j])
+                                bpfsptree_node.freq_item_ex_child_nodes[symbol].projection_nodes.append(new_created_nodes[j])
                             # completed all the works
                         else:
                             # a frequent pattern became infrequent
                             # update in the TLB
                             if(checked_all == True):
-                                bpfsptree_node.non_freq_item_ex_support[i_list[i]] = actual_support
+                                bpfsptree_node.non_freq_item_ex_support[symbol] = actual_support
                             # pruning a subtree
                             pass
                     else:
                         # not in the frequent pattern tree
-                        if(bpfsptree_node.non_freq_item_ex_support.get(i_list[i]) != None):
+                        if(bpfsptree_node.non_freq_item_ex_support.get(symbol) != None):
                             # it is in the TLB
-                            actual_support, modified_nodes, new_created_nodes, checked_all = self.ItemsetExtensionIncremental(modified_node_list, i_list[i], minimum_support_threshold, pass_no, last_event_item_bitset, bpfsptree_node.non_freq_item_ex_support[i_list[i]])
+                            actual_support, modified_nodes, new_created_nodes, checked_all = self.ItemsetExtensionIncremental(modified_node_list, symbol, minimum_support_threshold, pass_no, last_event_item_bitset, bpfsptree_node.non_freq_item_ex_support[symbol])
                             if(actual_support >= minimum_support_threshold):
                                 # previously non frequent was in TLB getting frequent now
-                                del bpfsptree_node.non_freq_item_ex_support[i_list[i]]
+                                del bpfsptree_node.non_freq_item_ex_support[symbol]
 
                                 # creating a new BPFSP Tree node
-                                bpfsptree_node.freq_item_ex_child_nodes[i_list[i]] = BPFSP_Tree()
-                                bpfsptree_node.freq_item_ex_child_nodes[i_list[i]].parent_node = bpfsptree_node
-                                bpfsptree_node.freq_item_ex_child_nodes[i_list[i]].item = i_list[i]
-                                bpfsptree_node.freq_item_ex_child_nodes[i_list[i]].support = actual_support
+                                bpfsptree_node.freq_item_ex_child_nodes[symbol] = BPFSP_Tree()
+                                bpfsptree_node.freq_item_ex_child_nodes[symbol].parent_node = bpfsptree_node
+                                bpfsptree_node.freq_item_ex_child_nodes[symbol].item = symbol
+                                bpfsptree_node.freq_item_ex_child_nodes[symbol].support = actual_support
 
                                 # getting the previous unmodified nodes from the parent node's unmodifed nodes
                                 if(unmodified_node_list_calculated == False):
                                     # if unmodified_node_list not calculate first calculate it
                                     unmodified_node_list = self.GettingUnmodifiedNodes(bpfsptree_node, pass_no)
                                     unmodified_node_list_calculated = True
-                                unmodified_nodes = self.ItemsetExtensionForUnmodifiedPart(unmodified_node_list, i_list[i], last_event_item_bitset)
+                                unmodified_nodes = self.ItemsetExtensionForUnmodifiedPart(unmodified_node_list, symbol, last_event_item_bitset)
 
                                 # saving the previous unmodified nodes
                                 for j in range(0,len(unmodified_nodes)):
-                                    bpfsptree_node.freq_item_ex_child_nodes[i_list[i]].projection_nodes.append(unmodified_nodes[j])
+                                    bpfsptree_node.freq_item_ex_child_nodes[symbol].projection_nodes.append(unmodified_nodes[j])
 
                                 # getting the unmodified nodes from the modified nodes
-                                unmodified_nodes = self.ItemsetExtensionFromModifiedToUnmodified(modified_node_list, i_list[i], last_event_item_bitset, pass_no)
+                                unmodified_nodes = self.ItemsetExtensionFromModifiedToUnmodified(modified_node_list, symbol, last_event_item_bitset, pass_no)
                                 for j in range(0,len(unmodified_nodes)):
-                                    bpfsptree_node.freq_item_ex_child_nodes[i_list[i]].projection_nodes.append(unmodified_nodes[j])
+                                    bpfsptree_node.freq_item_ex_child_nodes[symbol].projection_nodes.append(unmodified_nodes[j])
 
                                 # saving the new nodes
                                 for j in range(0, len(new_created_nodes)):
-                                    bpfsptree_node.freq_item_ex_child_nodes[i_list[i]].projection_nodes.append(new_created_nodes[j])
+                                    bpfsptree_node.freq_item_ex_child_nodes[symbol].projection_nodes.append(new_created_nodes[j])
 
                                 # saving the modified nodes for future extension
-                                itemset_extended_modified_sp_tree_nodes[i_list[i]] = modified_nodes
+                                itemset_extended_modified_sp_tree_nodes[symbol] = modified_nodes
+                                new_i_list.append(symbol)
+
                                 # completed all the works
                             else:
                                 # previously was infrequent, still infrequent, update in TLB with new frequency
                                 if(checked_all == True):
-                                    bpfsptree_node.non_freq_item_ex_support[i_list[i]] = actual_support
+                                    bpfsptree_node.non_freq_item_ex_support[symbol] = actual_support
                                 else:
                                     # the support is not properly calculated
-                                    del bpfsptree_node.non_freq_item_ex_support[i_list[i]]
+                                    del bpfsptree_node.non_freq_item_ex_support[symbol]
                                 # completd all the works
                         else:
                             # it is not in the TB
-                            actual_support, next_level_nodes, modified_nodes, checked_all = self.ItemsetExtensionNormal(self, bpfsptree_node.projection_nodes, i_list[i], minimum_support_threshold, pass_no, last_event_item_bitset, bpfsptree_node.support)
+                            actual_support, next_level_nodes, modified_nodes, checked_all = self.ItemsetExtensionNormal(self, bpfsptree_node.projection_nodes, symbol, minimum_support_threshold, pass_no, last_event_item_bitset, bpfsptree_node.support)
                             if( actual_support >= minimum_support_threshold):
                                 # creating a new BPFSP Tree node
-                                bpfsptree_node.freq_item_ex_child_nodes[i_list[i]] = BPFSP_Tree()
-                                bpfsptree_node.freq_item_ex_child_nodes[i_list[i]].parent_node = bpfsptree_node
-                                bpfsptree_node.freq_item_ex_child_nodes[i_list[i]].item = i_list[i]
-                                bpfsptree_node.freq_item_ex_child_nodes[i_list[i]].support = actual_support
-                                bpfsptree_node.freq_item_ex_child_nodes[i_list[i]].projection_nodes = next_level_nodes
+                                bpfsptree_node.freq_item_ex_child_nodes[symbol] = BPFSP_Tree()
+                                bpfsptree_node.freq_item_ex_child_nodes[symbol].parent_node = bpfsptree_node
+                                bpfsptree_node.freq_item_ex_child_nodes[symbol].item = symbol
+                                bpfsptree_node.freq_item_ex_child_nodes[symbol].support = actual_support
+                                bpfsptree_node.freq_item_ex_child_nodes[symbol].projection_nodes = next_level_nodes
 
                                 #saving the nodes for further extension
-                                itemset_extended_modified_sp_tree_nodes[i_list[i]] = modified_nodes
+                                itemset_extended_modified_sp_tree_nodes[symbol] = modified_nodes
+                                new_i_list.append(symbol)
+
                             else:
                                 if(checked_all == True):
-                                    bpfsptree_node.non_freq_item_ex_support[i_list[i]] = actual_support
+                                    bpfsptree_node.non_freq_item_ex_support[symbol] = actual_support
                 else:
                     # no need to check for itemset extension
-                    if(bpfsptree_node.freq_item_ex_child_nodes.get(i_list[i]) != None):
+                    if(bpfsptree_node.freq_item_ex_child_nodes.get(symbol) != None):
                         # need to prune a subtree from BPFSP Tree
                         pass
                     else:
-                        if(bpfsptree_node.non_freq_item_ex_support.get(i_list[i]) != None):
-                            del bpfsptree_node.non_freq_item_ex_support[i_list[i]]
+                        if(bpfsptree_node.non_freq_item_ex_support.get(symbol) != None):
+                            del bpfsptree_node.non_freq_item_ex_support[symbol]
                             # completed all the works
                         else:
                             # non frequent, non in TLB also, nothing to do
                             # completed all the works
                             pass
+
+        # Recursive Extension
+        # sequence Extension
+        for key in sequence_extended_modified_sp_tree_nodes:
+            while len(new_i_list)>0:
+                value = i_list_from_s_list.popleft()
+                if(value > key):
+                    i_list_from_s_list.appendleft(value)
+                    break
+            self.IncrementalTreeMiner(sequence_extended_modified_sp_tree_nodes[key], pattern.append(key), 1<<key, new_s_list, i_list_from_s_list, bpfsptree_node.freq_seq_ex_child_nodes[key], cetables, cetablei, minimum_support_threshold, pass_no)
+
+        # itemset extension
+        for key in itemset_extended_modified_sp_tree_nodes:
+            while len(new_i_list) > 0:
+                value = new_i_list.popleft()
+                if(value > key):
+                    new_i_list.appendleft(value)
+                    break
+            self.IncrementalTreeMiner(itemset_extended_modified_sp_tree_nodes[key], pattern[len(pattern)-1].append(key), last_event_item_bitset | 1<< key, new_s_list, new_i_list, bpfsptree_node.freq_item_ex_child_nodes[key], cetables, cetablei, minimum_support_threshold, pass_no)
