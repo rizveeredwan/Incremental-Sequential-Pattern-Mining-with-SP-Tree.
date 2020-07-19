@@ -40,6 +40,8 @@ class Main:
         value = ""
         self.pass_no=self.pass_no+1
         new_items={}
+        modified_nodes = {}
+        complete_set_of_modified_nodes = {}
         for i in range(0,self.new_input):
             line = input()
             sid, processed_sequence = self.ProcessSequence(line)
@@ -56,7 +58,14 @@ class Main:
             value.UpdateCETables(new_items, self.cetables, value, value.last_event_no)
             value.UpdateCETablei(new_items, self.cetablei, value)
             value.last_event_no = value.last_event_no + len(processed_sequence)
-            self.inc_sp_tree_functionalities.UpdatePath(end_sp_tree_node, self.pass_no, {})
+            modified_nodes.clear()
+            self.inc_sp_tree_functionalities.UpdatePath(end_sp_tree_node, self.pass_no, {}, {})
+            for key in modified_nodes:
+                if(complete_set_of_modified_nodes.get(key) == None):
+                    complete_set_of_modified_nodes[key] = []
+                complete_set_of_modified_nodes[key].append(modified_nodes[key])
+
+
         print("completed")
 
 sys.stdin = open('input.txt','r')

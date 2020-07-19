@@ -72,12 +72,13 @@ class INC_SP_Tree_Functionalities:
             new_items[item]=True
         return self.Insert(pass_no, node, processed_sequence, event_no, item_no+1, actual_event_no, sequence_summarizer_structure, event_bitset | (1<<item), new_items)
 
-    def UpdatePath(self, node, pass_no, next_link_nodes):
+    def UpdatePath(self, node, pass_no, next_link_nodes, modified_nodes):
         if(node == None):
             return
         if(node.modified_at<pass_no):
             node.modified_at=pass_no
             node.previous_count=node.present_count
+            modified_nodes[node.item] = node
         node.present_count=node.present_count+1
 
         for key in next_link_nodes:
@@ -91,7 +92,7 @@ class INC_SP_Tree_Functionalities:
         else:
             if(next_link_nodes.get(node.item) != None):
                 del next_link_nodes[node.item]
-        self.UpdatePath(node.parent_node, pass_no, next_link_nodes)
+        self.UpdatePath(node.parent_node, pass_no, next_link_nodes, modified_nodes)
         return
 
     def SequenceExtensionNormal(self, node_list, item, minimum_support_threshold, pass_no, current_maximum_support):
