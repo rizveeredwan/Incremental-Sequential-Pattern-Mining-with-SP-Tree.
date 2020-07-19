@@ -1,10 +1,11 @@
 import sys
-from math import log,floor
+from math import log, floor, ceil
+from collections import deque
 
 from INC_SP_Tree import INC_SP_Tree_Node
 from INC_SP_Tree import INC_SP_Tree_Functionalities
 
-from BPFSP_Tree import BPFSP_Tree
+from BPFSP_Tree import BPFSP_Tree, RecursiveExtensionEndLinkedListPtr
 from Sequence_Summarizer_Structure import SequenceSummarizerStructure
 
 class Main:
@@ -16,6 +17,15 @@ class Main:
         self.inc_sp_tree_functionalities = INC_SP_Tree_Functionalities()
         self.cetables={}
         self.cetablei={}
+        self.head_recursive_extension_end_linked_list_ptr = RecursiveExtensionEndLinkedListPtr()
+        self.current_recursive_extension_end_linked_list_ptr = self.head_recursive_extension_end_linked_list_ptr
+        self.single_item_freq_table = {}
+        self.complete_set_of_modified_nodes={}
+        self.total_database_size = 0
+        self.percentage_threshold = 0
+        self.bpfsptree_root = BPFSP_Tree()
+        self.complete_set_of_new_created_nodes = {}
+
 
     def ProcessSequence(self,line):
         line = line.strip().split(' ')
@@ -34,6 +44,7 @@ class Main:
 
     def DatabaseInput(self):
         self.new_input = int(input())
+        self.total_database_size = self.total_database_size + self.new_input
         line = ""
         sid = -1
         processed_sequence = []
@@ -41,7 +52,8 @@ class Main:
         self.pass_no=self.pass_no+1
         new_items={}
         modified_nodes = {}
-        complete_set_of_modified_nodes = {}
+        self.complete_set_of_modified_nodes.clear()
+        self.complete_set_of_new_created_nodes.clear()
         for i in range(0,self.new_input):
             line = input()
             sid, processed_sequence = self.ProcessSequence(line)
@@ -62,10 +74,84 @@ class Main:
             self.inc_sp_tree_functionalities.UpdatePath(end_sp_tree_node, self.pass_no, {}, {})
             for key in modified_nodes:
                 if(complete_set_of_modified_nodes.get(key) == None):
-                    complete_set_of_modified_nodes[key] = []
-                complete_set_of_modified_nodes[key].append(modified_nodes[key])
+                    self.complete_set_of_modified_nodes[key] = []
+                self.complete_set_of_modified_nodes[key].append(modified_nodes[key])
+                if(modified_nodes[key].created_at == self.pass_no):
+                    # newly created nodes
+                    if(self.complete_set_of_new_created_nodes.get(key) == None):
+                        self.complete_set_of_new_created_nodes[key]=[]
+                    self.complete_set_of_new_created_nodes.append(modified_nodes[key])
 
+    def MakingSList(self, item, minimum_support_threshold):
+        s_list = deque()
+        if(self.cetables.get(item) == None):
+            return s_list
+        for key in self.cetables:
+            if(self.cetables[item].get(key) >= minimum_support_threshold):
+                s_list.append(key)
+        return s_list
 
+    def MakingIList(self, item, minimum_support_threshold):
+        i_list = deque()
+        if(self.cetablei.get(item) == None):
+            return i_list
+        for key in self.cetablei:
+            if(key > item and self.cetablei[item].get(key) >= minimum_support_threshold):
+                i_list.append(key)
+        return i_list
+
+    def CreatingNodeFromBPFSPTree(self, item, actual_support, projection_nodes, pass_no):
+        self.bpfsptree_root.freq_seq_ex_child_nodes[item] = BPFSP_Tree()
+        self.bpfsptree_root.freq_seq_ex_child_nodes[item].parent_node = self.bpfsptree_root
+        self.bpfsptree_root.freq_seq_ex_child_nodes[item].item = item
+        self.bpfsptree_root.freq_seq_ex_child_nodes[item].support = actual_support
+        self.bpfsptree_root.freq_seq_ex_child_nodes[item].connection_type_with_parent = True
+        self.bpfsptree_root.freq_seq_ex_child_nodes[item].projection_nodes = projection_nodes
+
+        if(pass_no > 1):
+            # It was not created in the first pass, so nodes might exist beside of modified nodes
+            # need to take all sorts of nodes
+            for node in self.inc_sp_tree_root.next_link[item]:
+                if(node.modified_at < pass_no):
+                    self.bpfsptree_root.freq_seq_ex_child_nodes[item].projection_nodes.append(node)
+        return
+
+    def UpdatingABPFSPTreeNode(self, item, actual_support, new_created_nodes):
+        self.bpfsptree_root.freq_seq_ex_child_nodes[item].support = actual_support
+        for node in new_created_nodes:
+            self.bpfsptree_root.freq_seq_ex_child_nodes[item].projection_nodes.append(node)
+        return
+
+    def InitiateCompleteMining(self):
+        for key in self.complete_set_of_modified_nodes:
+            if(self.single_item_freq_table.get(key) == None):
+                self.single_item_freq_table[key] = 0
+            for i in range(0, len(self.complete_set_of_modified_nodes[key])):
+                self.single_item_freq_table[key] = self.single_item_freq_table[key] + self.complete_set_of_modified_nodes[key][i].present_count - self.complete_set_of_modified_nodes[key][i].previous_count
+        minimum_support_threshold = int(ceil(self.percentage_threshold * self.total_database_size))
+        for key in self.complete_set_of_modified_nodes:
+            if(self.single_item_freq_table[key]>= minimum_support_threshold):
+                # some updates: somes frequency will increase and some will fail
+                # updating the recursive extension end linked list pointer
+                self.inc_sp_tree_functionalities.UpdateRecursiveExtensionEndListPtr(self.current_recursive_extension_end_linked_list_ptr)
+                s_list = self.MakingSList(key, minimum_support_threshold)
+                i_list = self.MakingIList(key, minimum_support_threshold)
+                if(self.bpfsptree_root.freq_seq_ex_child_nodes.get(key) == None):
+                    # this pattern was not frequent previously
+                    self.CreatingNodeFromBPFSPTree(key, self.single_item_freq_table[key], self.complete_set_of_modified_nodes[key], self.pass_no)
+                else:
+                    # was already frequent previously
+                    # might need to add newly created nodes
+                    if(self.complete_set_of_new_created_nodes.get(key) != None):
+                        self.UpdatingABPFSPTreeNode(key, self.single_item_freq_table[key], self.complete_set_of_new_created_nodes[key])
+                    else:
+                        self.UpdatingABPFSPTreeNode(key, self.single_item_freq_table[key], [])
+                self.inc_sp_tree_functionalities.IncrementalTreeMiner(self.complete_set_of_modified_nodes[key], [key], 1<<key, s_list, i_list, bpfsptree_node.freq_seq_ex_child_nodes[key], self.cetables, self.cetablei, minimum_support_threshold, self.pass_no)
+                self.current_recursive_extension_end_linked_list_ptr = self.inc_sp_tree_functionalities.GetUpdateRecursiveExtensionEndListPtr()
+                # completed all the works 
+            else:
+                # A complete branch prune
+                pass
         print("completed")
 
 sys.stdin = open('input.txt','r')

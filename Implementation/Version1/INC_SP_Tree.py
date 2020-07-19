@@ -752,7 +752,15 @@ class INC_SP_Tree_Functionalities:
                     new_i_list.appendleft(value)
                     break
             self.IncrementalTreeMiner(itemset_extended_modified_sp_tree_nodes[key], pattern[len(pattern)-1].append(key), last_event_item_bitset | 1<< key, new_s_list, new_i_list, bpfsptree_node.freq_item_ex_child_nodes[key], cetables, cetablei, minimum_support_threshold, pass_no)
+        return 
 
+    def UpdateRecursiveExtensionEndListPtr(self, new_recursive_extension_end_linked_list_ptr):
+        global current_recursive_extension_end_linked_list_ptr
+        current_recursive_extension_end_linked_list_ptr = new_recursive_extension_end_linked_list_ptr
+        return
+    def GetUpdateRecursiveExtensionEndListPtr(self):
+        global current_recursive_extension_end_linked_list_ptr
+        return current_recursive_extension_end_linked_list_ptr
     def InitiateRemovingFromBottom(self, recursive_extension_end_linked_list_ptr, minimum_support_threshold):
         # the root starter will be sent: so start from the next
         while True:
