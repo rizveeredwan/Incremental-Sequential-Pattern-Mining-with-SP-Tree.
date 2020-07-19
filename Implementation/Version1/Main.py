@@ -148,11 +148,19 @@ class Main:
                         self.UpdatingABPFSPTreeNode(key, self.single_item_freq_table[key], [])
                 self.inc_sp_tree_functionalities.IncrementalTreeMiner(self.complete_set_of_modified_nodes[key], [key], 1<<key, s_list, i_list, bpfsptree_node.freq_seq_ex_child_nodes[key], self.cetables, self.cetablei, minimum_support_threshold, self.pass_no)
                 self.current_recursive_extension_end_linked_list_ptr = self.inc_sp_tree_functionalities.GetUpdateRecursiveExtensionEndListPtr()
-                # completed all the works 
+                # completed all the works
             else:
                 # A complete branch prune
-                pass
-        print("completed")
+                self.inc_sp_tree_functionalities.UpdateRecursiveExtensionEndListPtr(self.current_recursive_extension_end_linked_list_ptr)
+                self.inc_sp_tree_functionalities.BPFSP_Tree(self.bpfsptree_root.freq_seq_ex_child_nodes[key])
+                del self.bpfsptree_root.freq_seq_ex_child_nodes[key]
+                self.current_recursive_extension_end_linked_list_ptr = self.inc_sp_tree_functionalities.GetUpdateRecursiveExtensionEndListPtr()
+                # completed all the works
+        if(self.pass_no > 1):
+            # need to see which big patterns got infrequent
+            self.inc_sp_tree_functionalities.InitiateRemovingFromBottom(self.head_recursive_extension_end_linked_list_ptr, minimum_support_threshold)
+
+
 
 sys.stdin = open('input.txt','r')
 #sys.stdout = open('output.txt','w')

@@ -391,9 +391,12 @@ class INC_SP_Tree_Functionalities:
         return new_recursive_extension_end_linked_list_ptr
 
     def PruningBPFSPBranchFromBottom(self, bpfsptree_node, minimum_support_threshold, recursive_extension_end_linked_list_ptr):
+        global current_recursive_extension_end_linked_list_ptr
         if(bpfsptree_node.support >= minimum_support_threshold):
             if(len(bpfsptree_node.freq_seq_ex_child_nodes) > 0 or len(bpfsptree_node.freq_item_ex_child_nodes) > 0 ):
                 recursive_extension_end_linked_list_ptr.previous_list_ptr.next_list_ptr = recursive_extension_end_linked_list_ptr.next_list_ptr
+                if(recursive_extension_end_linked_list_ptr.previous_list_ptr.next_list_ptr == None):
+                    current_recursive_extension_end_linked_list_ptr = recursive_extension_end_linked_list_ptr.previous_list_ptr
                 del recursive_extension_end_linked_list_ptr
                 return
             else:
@@ -414,10 +417,14 @@ class INC_SP_Tree_Functionalities:
             else:
                 # root
                 recursive_extension_end_linked_list_ptr.previous_list_ptr.next_list_ptr = recursive_extension_end_linked_list_ptr.next_list_ptr
+                if(recursive_extension_end_linked_list_ptr.previous_list_ptr.next_list_ptr == None):
+                    # it is the last node
+                    current_recursive_extension_end_linked_list_ptr = recursive_extension_end_linked_list_ptr.previous_list_ptr
                 del recursive_extension_end_linked_list_ptr
                 return
 
     def BPFSPSubTreePruning(self, bpfsptree_node):
+        global current_recursive_extension_end_linked_list_ptr
         for key in bpfsptree_node.freq_seq_ex_child_nodes:
             self.BPFSPSubTreePruning(bpfsptree_node.freq_seq_ex_child_nodes[key])
         del bpfsptree_node.freq_seq_ex_child_nodes
@@ -427,6 +434,9 @@ class INC_SP_Tree_Functionalities:
         if(bpfsptree_node.recursive_extension_end_linked_list_ptr != None):
             # it was an end node before
             bpfsptree_node.recursive_extension_end_linked_list_ptr.previous_list_ptr.next_list_ptr = bpfsptree_node.recursive_extension_end_linked_list_ptr.next_list_ptr
+            if(bpfsptree_node.recursive_extension_end_linked_list_ptr.previous_list_ptr.next_list_ptr == None):
+                # it is the last node
+                current_recursive_extension_end_linked_list_ptr = bpfsptree_node.recursive_extension_end_linked_list_ptr.previous_list_ptr
             del bpfsptree_node.recursive_extension_end_linked_list_ptr
         del bpfsptree_node
         return
@@ -752,7 +762,7 @@ class INC_SP_Tree_Functionalities:
                     new_i_list.appendleft(value)
                     break
             self.IncrementalTreeMiner(itemset_extended_modified_sp_tree_nodes[key], pattern[len(pattern)-1].append(key), last_event_item_bitset | 1<< key, new_s_list, new_i_list, bpfsptree_node.freq_item_ex_child_nodes[key], cetables, cetablei, minimum_support_threshold, pass_no)
-        return 
+        return
 
     def UpdateRecursiveExtensionEndListPtr(self, new_recursive_extension_end_linked_list_ptr):
         global current_recursive_extension_end_linked_list_ptr
