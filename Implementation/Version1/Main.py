@@ -24,9 +24,11 @@ class Main:
         self.single_item_freq_table = {}
         self.complete_set_of_modified_nodes={}
         self.total_database_size = 0
-        self.percentage_threshold = 0
+        self.percentage_threshold = 0 # percentage threshold upong will minimum support threshold will vary
         self.bpfsptree_root = BPFSP_Tree()
         self.complete_set_of_new_created_nodes = {}
+
+        self.iteration_count_input = 0 # number of iterations
 
 
     def ProcessSequence(self,line):
@@ -130,7 +132,7 @@ class Main:
                 self.single_item_freq_table[key] = 0
             for i in range(0, len(self.complete_set_of_modified_nodes[key])):
                 self.single_item_freq_table[key] = self.single_item_freq_table[key] + self.complete_set_of_modified_nodes[key][i].present_count - self.complete_set_of_modified_nodes[key][i].previous_count
-        minimum_support_threshold = int(ceil(self.percentage_threshold * self.total_database_size))
+        minimum_support_threshold = int(ceil((self.percentage_threshold * self.total_database_size)/(100.0)))
         for key in self.complete_set_of_modified_nodes:
             if(self.single_item_freq_table[key]>= minimum_support_threshold):
                 # some updates: somes frequency will increase and some will fail
@@ -167,16 +169,37 @@ class Main:
         current_memory = process.memory_info().rss # in bytes
         print(current_memory)
 
+    def ReadPercentageThresholdAndIterationCount(self, file_name):
+        with open(file_name, 'r') as file:
+            lines = file.readlines()
+            self.percentage_threshold = float(lines[0].strip())
+            self.iteration_count_input = int(lines[1].strip())
+        return
 
 
 
-sys.stdin = open('input.txt','r')
+#sys.stdin = open('input.txt','r')
 #sys.stdout = open('output.txt','w')
 
-main = Main()
-main.DatabaseInput()
+directory = '../Dataset/Testing-Dataset'
 
-#pass will start with 1
+main = Main()
+# read percentage threshold and iteration count
+main.ReadPercentageThresholdAndIterationCount(directory+'/metadata.txt')
+
+# pass will start with 1
+input_file_name = ''
+for i in range(1,main.iteration_count_input+1):
+    input_file_name = directory+'/in'+str(i)+'.txt'
+    sys.stdin = open(input_file_name,'r')
+    main.DatabaseInput()
+
+
+
+
+
+
+
 
 """
 value = 1<<65789

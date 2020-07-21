@@ -4,6 +4,7 @@ from math import log, floor
 from collections import deque
 
 current_recursive_extension_end_linked_list_ptr = ""
+total_created_node_count = 0
 
 class ItemEventCombination:
     def __init__(self,item,event):
@@ -22,6 +23,9 @@ class INC_SP_Tree_Node:
         self.present_count = 0
         self.next_link={}
         self.parent_item_bitset=0
+
+        # DEBUG:
+        self.node_id = 0
 
 class INC_SP_Tree_Functionalities:
 
@@ -43,27 +47,33 @@ class INC_SP_Tree_Functionalities:
         return
 
     def Insert(self, pass_no, sp_tree_node, processed_sequence, event_no, item_no, actual_event_no, sequence_summarizer_structure, event_bitset, new_items):
+        global total_created_node_count
+
         if(event_no>=len(processed_sequence)):
             return sp_tree_node
         if(item_no >= len(processed_sequence[event_no])):
             # updating to perform CETable_i operation
             return self.Insert(pass_no,sp_tree_node,processed_sequence,event_no+1,0,actual_event_no,sequence_summarizer_structure, 0, new_items)
         item = processed_sequence[event_no][item_no]
-        item_event_combination = ItemEventCombination(item,actual_event_no+event_no+1)
-        node = sp_tree_node.child_link.get(item_event_combination)
+        if(sp_tree_node.child_link.get(item) == None):
+            sp_tree_node.child_link[item]={}
+        node  = sp_tree_node.child_link[item].get(actual_event_no+event_no+1)
         if(node == None):
-            sp_tree_node.child_link[item_event_combination] = INC_SP_Tree_Node()
-            sp_tree_node.child_link[item_event_combination].item = item
-            sp_tree_node.child_link[item_event_combination].event_no = event_no + actual_event_no + 1
-            sp_tree_node.child_link[item_event_combination].created_at = pass_no
-            sp_tree_node.child_link[item_event_combination].parent_node = sp_tree_node
-            sp_tree_node.child_link[item_event_combination].previous_count = 0
-            sp_tree_node.child_link[item_event_combination].present_count = 0
-            sp_tree_node.child_link[item_event_combination].parent_item_bitset = event_bitset
-            node = sp_tree_node.child_link[item_event_combination]
+            sp_tree_node.child_link[item][actual_event_no+event_no+1] = INC_SP_Tree_Node()
+            sp_tree_node.child_link[item][actual_event_no+event_no+1].item = item
+            sp_tree_node.child_link[item][actual_event_no+event_no+1].event_no = event_no + actual_event_no + 1
+            sp_tree_node.child_link[item][actual_event_no+event_no+1].created_at = pass_no
+            sp_tree_node.child_link[item][actual_event_no+event_no+1].parent_node = sp_tree_node
+            sp_tree_node.child_link[item][actual_event_no+event_no+1].previous_count = 0
+            sp_tree_node.child_link[item][actual_event_no+event_no+1].present_count = 0
+            sp_tree_node.child_link[item][actual_event_no+event_no+1].parent_item_bitset = event_bitset
+            node = sp_tree_node.child_link[item][actual_event_no+event_no+1]
+            ############## For Debug ######################
+            total_created_node_count = total_created_node_count + 1
+            sp_tree_node.child_link[item][actual_event_no+event_no+1].node_id = total_created_node_count
 
         # First, mid, last updating to calculate CETable_s
-        self.SequenceSummarizerSequenceExtensionUpdate(sequence_summarizer_structure, item, event_no)
+        self.SequenceSummarizerSequenceExtensionUpdate(sequence_summarizer_structure, item, event_no + actual_event_no + 1)
         # updating the sequence summarizer table to perform CETable_i
         if(item_no>=1):
             self.SequenceSummarizerItemsetExtensionUpdate(sequence_summarizer_structure, item, event_bitset)
@@ -93,6 +103,14 @@ class INC_SP_Tree_Functionalities:
             if(next_link_nodes.get(node.item) != None):
                 del next_link_nodes[node.item]
         self.UpdatePath(node.parent_node, pass_no, next_link_nodes, modified_nodes)
+        return
+
+    # # DEBUG:
+    def PrintINCSPTree(self, node):
+        print("id = ",node.node_id, "( item, event, count ) = ( ", node.item, node.event_no, node.present_count," )")
+        for key in node.child_link:
+            for key2 in node.child_link[key]:
+                self.PrintINCSPTree(node.child_link[key][key2])
         return
 
     def SequenceExtensionNormal(self, node_list, item, minimum_support_threshold, pass_no, current_maximum_support):
