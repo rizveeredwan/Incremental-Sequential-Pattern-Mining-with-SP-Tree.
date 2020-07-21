@@ -72,22 +72,21 @@ class Main:
             end_sp_tree_node = self.inc_sp_tree_functionalities.Insert(self.pass_no, value.sp_tree_end_node_ptr , processed_sequence, 0, 0, value.last_event_no, value, 0, new_items)
             value.sp_tree_end_node_ptr = end_sp_tree_node
             value.UpdateCETables(new_items, self.cetables, value, value.last_event_no)
-            print("print start")
-            value.ShowSequenceSummarizerStructure(value)
-            print("print complete")
             value.UpdateCETablei(new_items, self.cetablei, value)
             value.last_event_no = value.last_event_no + len(processed_sequence)
             modified_nodes.clear()
-            self.inc_sp_tree_functionalities.UpdatePath(end_sp_tree_node, self.pass_no, {}, {})
+            self.inc_sp_tree_functionalities.UpdatePath(end_sp_tree_node, self.pass_no, {}, modified_nodes)
+            print("printing")
             for key in modified_nodes:
-                if(complete_set_of_modified_nodes.get(key) == None):
+                print(key,modified_nodes[key].node_id,modified_nodes[key].present_count,modified_nodes[key].previous_count)
+                if(self.complete_set_of_modified_nodes.get(key) == None):
                     self.complete_set_of_modified_nodes[key] = []
                 self.complete_set_of_modified_nodes[key].append(modified_nodes[key])
                 if(modified_nodes[key].created_at == self.pass_no):
                     # newly created nodes
                     if(self.complete_set_of_new_created_nodes.get(key) == None):
                         self.complete_set_of_new_created_nodes[key]=[]
-                    self.complete_set_of_new_created_nodes.append(modified_nodes[key])
+                    self.complete_set_of_new_created_nodes[key].append(modified_nodes[key])
 
     def MakingSList(self, item, minimum_support_threshold):
         s_list = deque()
@@ -136,6 +135,8 @@ class Main:
             for i in range(0, len(self.complete_set_of_modified_nodes[key])):
                 self.single_item_freq_table[key] = self.single_item_freq_table[key] + self.complete_set_of_modified_nodes[key][i].present_count - self.complete_set_of_modified_nodes[key][i].previous_count
         minimum_support_threshold = int(ceil((self.percentage_threshold * self.total_database_size)/(100.0)))
+        print(self.single_item_freq_table,len(self.single_item_freq_table))
+        """
         for key in self.complete_set_of_modified_nodes:
             if(self.single_item_freq_table[key]>= minimum_support_threshold):
                 # some updates: somes frequency will increase and some will fail
@@ -166,6 +167,7 @@ class Main:
         if(self.pass_no > 1):
             # need to see which big patterns got infrequent
             self.inc_sp_tree_functionalities.InitiateRemovingFromBottom(self.head_recursive_extension_end_linked_list_ptr, minimum_support_threshold)
+        """
 
     def MemoryUsage(self):
         process = psutil.Process(os.getpid())
@@ -179,7 +181,18 @@ class Main:
             self.iteration_count_input = int(lines[1].strip())
         return
 
-
+    # # DEBUG:
+    def PrintCETable(self):
+        print("CETABLE S")
+        for key in self.cetables:
+            print("item = ",key)
+            for key1 in self.cetables[key]:
+                print("(",key1,self.cetables[key][key1],")")
+        print("CETABLE I")
+        for key in self.cetablei:
+            print("item = ",key)
+            for key1 in self.cetablei[key]:
+                print("(",key1,self.cetablei[key][key1],")")
 
 #sys.stdin = open('input.txt','r')
 #sys.stdout = open('output.txt','w')
@@ -195,7 +208,11 @@ input_file_name = ''
 for i in range(1,main.iteration_count_input+1):
     input_file_name = directory+'/in'+str(i)+'.txt'
     sys.stdin = open(input_file_name,'r')
+    # INC SP Tree build complete
     main.DatabaseInput()
+    # Now need to mine
+    main.InitiateCompleteMining()
+
 
 
 

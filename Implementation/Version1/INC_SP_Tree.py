@@ -88,7 +88,13 @@ class INC_SP_Tree_Functionalities:
         if(node.modified_at<pass_no):
             node.modified_at=pass_no
             node.previous_count=node.present_count
-            modified_nodes[node.item] = node
+            if(node.item != ""):
+                # not taking root
+                modified_nodes[node.item] = node
+        else:
+            # this modified node is already tracked
+            if(node.item != "" and modified_nodes.get(node.item) != None):
+                del modified_nodes[node.item]
         node.present_count=node.present_count+1
 
         for key in next_link_nodes:

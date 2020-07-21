@@ -46,18 +46,18 @@ class SequenceSummarizerStructure:
         for item in new_items:
             result = sequence_summarizer_structure.sequence_summarizer_table[item][1][1] & (sequence_summarizer_structure.sequence_summarizer_table[item][1][0] ^ sequence_summarizer_structure.sequence_summarizer_table[item][1][1]) # getting the changes
             if(result != 0):
-                if(cetablei.get(item) == None):
-                    cetablei[item]={}
                 while(result != 0):
-                    value = (result & (result-1)) #LSB off
+                    value = (result & (result-1)) # LSB off
                     value1 = value
                     value = result ^ value # Got set bit
                     value = int(floor(log(value,2)))
-                    if(cetablei[item].get(value) == None):
-                        cetablei[item][value]=0
-                    cetablei[item][value]=cetablei[item][value]+1
+                    if(cetablei.get(value) == None):
+                        cetablei[value]={}
+                    if(cetablei[value].get(item) == None):
+                        cetablei[value][item]=0
+                    cetablei[value][item]=cetablei[value][item]+1
                     result = value1
         for item in new_items:
-            sequence_summarizer_structure.sequence_summarizer_table[item][1][0] = sequence_summarizer_structure.sequence_summarizer_table[item][1][1]
+            sequence_summarizer_structure.sequence_summarizer_table[item][1][0] = sequence_summarizer_structure.sequence_summarizer_table[item][1][0] | sequence_summarizer_structure.sequence_summarizer_table[item][1][1]
             sequence_summarizer_structure.sequence_summarizer_table[item][1][1] = 0
         return
