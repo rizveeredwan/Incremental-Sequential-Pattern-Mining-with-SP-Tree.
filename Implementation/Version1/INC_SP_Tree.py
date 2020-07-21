@@ -405,47 +405,34 @@ class INC_SP_Tree_Functionalities:
         del bpfsptree_node.recursive_extension_end_linked_list_ptr
         return
 
-    def CreateNeRecursiveExtensionEndListPtr(self, current_recursive_extension_end_linked_list_ptr, bpfsptree_node):
+    def CreateNeRecursiveExtensionEndListPtr(self, present_recursive_extension_end_linked_list_ptr, bpfsptree_node):
         new_recursive_extension_end_linked_list_ptr = RecursiveExtensionEndLinkedListPtr()
         new_recursive_extension_end_linked_list_ptr.bpfsptree_node_ptr = bpfsptree_node
-        new_recursive_extension_end_linked_list_ptr.previous_list_ptr = current_recursive_extension_end_linked_list_ptr
+        new_recursive_extension_end_linked_list_ptr.previous_list_ptr = present_recursive_extension_end_linked_list_ptr
         new_recursive_extension_end_linked_list_ptr.next_list_ptr = None
 
-        current_recursive_extension_end_linked_list_ptr.next_list_ptr = new_recursive_extension_end_linked_list_ptr
+        present_recursive_extension_end_linked_list_ptr.next_list_ptr = new_recursive_extension_end_linked_list_ptr
         return new_recursive_extension_end_linked_list_ptr
 
-    def PruningBPFSPBranchFromBottom(self, bpfsptree_node, minimum_support_threshold, recursive_extension_end_linked_list_ptr):
+    def PruningBPFSPBranchFromBottom(self, bpfsptree_node, minimum_support_threshold):
         global current_recursive_extension_end_linked_list_ptr
-        if(bpfsptree_node.support >= minimum_support_threshold):
-            if(len(bpfsptree_node.freq_seq_ex_child_nodes) > 0 or len(bpfsptree_node.freq_item_ex_child_nodes) > 0 ):
-                recursive_extension_end_linked_list_ptr.previous_list_ptr.next_list_ptr = recursive_extension_end_linked_list_ptr.next_list_ptr
-                if(recursive_extension_end_linked_list_ptr.previous_list_ptr.next_list_ptr == None):
-                    current_recursive_extension_end_linked_list_ptr = recursive_extension_end_linked_list_ptr.previous_list_ptr
-                del recursive_extension_end_linked_list_ptr
-                return
+        unsatisfied_node = bpfsptree_node
+        while(True):
+            # detecting the topmost unsatisfied_node
+            if(unsatisfied_node.parent_node != None and unsatisfied_node.parent_node.support<minimum_support_threshold):
+                unsatisfied_node = unsatisfied_node.parent_node
             else:
-                # has become an end node
-                recursive_extension_end_linked_list_ptr.bpfsptree_node_ptr = bpfsptree_node
-                bpfsptree_node.recursive_extension_end_linked_list_ptr = recursive_extension_end_linked_list_ptr
-                return
-        else:
-            if(bpfsptree_node.parent_node != None):
-                # not root
-                # removing from parent node
-                if(bpfsptree_node.connection_type_with_parent == True):
-                    del bpfsptree_node.parent_node.freq_seq_ex_child_nodes[bpfsptree_node.item]
-                elif(bpfsptree_node.connection_type_with_parent == False):
-                    del bpfsptree_node.parent_node.freq_item_ex_child_nodes[bpfsptree_node.item]
-                self.PruningBPFSPBranchFromBottom(bpfsptree_node.parent_node, minimum_support_threshold, recursive_extension_end_linked_list_ptr)
-                return
-            else:
-                # root
-                recursive_extension_end_linked_list_ptr.previous_list_ptr.next_list_ptr = recursive_extension_end_linked_list_ptr.next_list_ptr
-                if(recursive_extension_end_linked_list_ptr.previous_list_ptr.next_list_ptr == None):
-                    # it is the last node
-                    current_recursive_extension_end_linked_list_ptr = recursive_extension_end_linked_list_ptr.previous_list_ptr
-                del recursive_extension_end_linked_list_ptr
-                return
+                break
+        save_parent_node = unsatisfied_node.parent_node
+        if(unsatisfied_node.connection_type_with_parent == True):
+            del unsatisfied_node.parent_node.freq_seq_ex_child_nodes[unsatisfied_node.item]
+        elif(unsatisfied_node.connection_type_with_parent == False):
+            del unsatisfied_node.parent_node.freq_item_ex_child_nodes[unsatisfied_node.item]
+        self.BPFSPSubTreePruning(unsatisfied_node)
+        if(save_parent_node.parent_node != None and len(save_parent_node.freq_seq_ex_child_nodes)==0 and len(save_parent_node.freq_item_ex_child_nodes) == 0):
+            # A new leaf node is created
+            current_recursive_extension_end_linked_list_ptr = self.CreateNeRecursiveExtensionEndListPtr(current_recursive_extension_end_linked_list_ptr, save_parent_node)
+        return
 
     def BPFSPSubTreePruning(self, bpfsptree_node):
         global current_recursive_extension_end_linked_list_ptr
@@ -797,14 +784,13 @@ class INC_SP_Tree_Functionalities:
         return current_recursive_extension_end_linked_list_ptr
     def InitiateRemovingFromBottom(self, recursive_extension_end_linked_list_ptr, minimum_support_threshold):
         # the root starter will be sent: so start from the next
+        save_previous = ""
         while True:
             recursive_extension_end_linked_list_ptr = recursive_extension_end_linked_list_ptr.next_list_ptr
             if(recursive_extension_end_linked_list_ptr == None):
                 break # completed all the checking
-            if(recursive_extension_end_linked_list_ptr.bpfsptree_node_ptr.support >= minimum_support_threshold):
-                continue
-            else:
-                save_next = recursive_extension_end_linked_list_ptr.next_list_ptr
-                self.PruningBPFSPBranchFromBottom(recursive_extension_end_linked_list_ptr.bpfsptree_node_ptr, minimum_support_threshold, recursive_extension_end_linked_list_ptr )
-                recursive_extension_end_linked_list_ptr = save_next
+            if(recursive_extension_end_linked_list_ptr.bpfsptree_node_ptr.support < minimum_support_threshold):
+                save_previous = recursive_extension_end_linked_list_ptr.previous_list_ptr
+                self.PruningBPFSPBranchFromBottom(recursive_extension_end_linked_list_ptr.bpfsptree_node_ptr)
+                recursive_extension_end_linked_list_ptr = save_previous
         return

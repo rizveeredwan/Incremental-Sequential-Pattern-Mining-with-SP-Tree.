@@ -76,9 +76,7 @@ class Main:
             value.last_event_no = value.last_event_no + len(processed_sequence)
             modified_nodes.clear()
             self.inc_sp_tree_functionalities.UpdatePath(end_sp_tree_node, self.pass_no, {}, modified_nodes)
-            print("printing")
             for key in modified_nodes:
-                print(key,modified_nodes[key].node_id,modified_nodes[key].present_count,modified_nodes[key].previous_count)
                 if(self.complete_set_of_modified_nodes.get(key) == None):
                     self.complete_set_of_modified_nodes[key] = []
                 self.complete_set_of_modified_nodes[key].append(modified_nodes[key])
@@ -92,8 +90,8 @@ class Main:
         s_list = deque()
         if(self.cetables.get(item) == None):
             return s_list
-        for key in self.cetables:
-            if(self.cetables[item].get(key) >= minimum_support_threshold):
+        for key in self.cetables[item]:
+            if(self.cetables[item][key] >= minimum_support_threshold):
                 s_list.append(key)
         return s_list
 
@@ -101,8 +99,8 @@ class Main:
         i_list = deque()
         if(self.cetablei.get(item) == None):
             return i_list
-        for key in self.cetablei:
-            if(key > item and self.cetablei[item].get(key) >= minimum_support_threshold):
+        for key in self.cetablei[item]:
+            if(key > item and self.cetablei[item][key] >= minimum_support_threshold):
                 i_list.append(key)
         return i_list
 
@@ -135,10 +133,9 @@ class Main:
             for i in range(0, len(self.complete_set_of_modified_nodes[key])):
                 self.single_item_freq_table[key] = self.single_item_freq_table[key] + self.complete_set_of_modified_nodes[key][i].present_count - self.complete_set_of_modified_nodes[key][i].previous_count
         minimum_support_threshold = int(ceil((self.percentage_threshold * self.total_database_size)/(100.0)))
-        print(self.single_item_freq_table,len(self.single_item_freq_table))
-        """
         for key in self.complete_set_of_modified_nodes:
             if(self.single_item_freq_table[key]>= minimum_support_threshold):
+                print(key, self.single_item_freq_table[key], minimum_support_threshold)
                 # some updates: somes frequency will increase and some will fail
                 # updating the recursive extension end linked list pointer
                 self.inc_sp_tree_functionalities.UpdateRecursiveExtensionEndListPtr(self.current_recursive_extension_end_linked_list_ptr)
@@ -159,15 +156,21 @@ class Main:
                 # completed all the works
             else:
                 # A complete branch prune
-                self.inc_sp_tree_functionalities.UpdateRecursiveExtensionEndListPtr(self.current_recursive_extension_end_linked_list_ptr)
-                self.inc_sp_tree_functionalities.BPFSP_Tree(self.bpfsptree_root.freq_seq_ex_child_nodes[key])
-                del self.bpfsptree_root.freq_seq_ex_child_nodes[key]
-                self.current_recursive_extension_end_linked_list_ptr = self.inc_sp_tree_functionalities.GetUpdateRecursiveExtensionEndListPtr()
-                # completed all the works
+                if(self.bpfsptree_root.freq_seq_ex_child_nodes.get(key) != None):
+                    # already it is in the frequent pattern tree
+                    # need to remove it
+                    self.inc_sp_tree_functionalities.UpdateRecursiveExtensionEndListPtr(self.current_recursive_extension_end_linked_list_ptr)
+                    self.inc_sp_tree_functionalities.BPFSPSubTreePruning(self.bpfsptree_root.freq_seq_ex_child_nodes[key])
+                    del self.bpfsptree_root.freq_seq_ex_child_nodes[key]
+                    self.current_recursive_extension_end_linked_list_ptr = self.inc_sp_tree_functionalities.GetUpdateRecursiveExtensionEndListPtr()
+                    # completed all the works
         if(self.pass_no > 1):
             # need to see which big patterns got infrequent
             self.inc_sp_tree_functionalities.InitiateRemovingFromBottom(self.head_recursive_extension_end_linked_list_ptr, minimum_support_threshold)
-        """
+            # updating with the current pointer
+            self.current_recursive_extension_end_linked_list_ptr = self.inc_sp_tree_functionalities.GetUpdateRecursiveExtensionEndListPtr()
+            # completed all the works
+
 
     def MemoryUsage(self):
         process = psutil.Process(os.getpid())
