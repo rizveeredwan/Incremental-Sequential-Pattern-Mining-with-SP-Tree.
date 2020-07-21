@@ -72,6 +72,9 @@ class Main:
             end_sp_tree_node = self.inc_sp_tree_functionalities.Insert(self.pass_no, value.sp_tree_end_node_ptr , processed_sequence, 0, 0, value.last_event_no, value, 0, new_items)
             value.sp_tree_end_node_ptr = end_sp_tree_node
             value.UpdateCETables(new_items, self.cetables, value, value.last_event_no)
+            print("print start")
+            value.ShowSequenceSummarizerStructure(value)
+            print("print complete")
             value.UpdateCETablei(new_items, self.cetablei, value)
             value.last_event_no = value.last_event_no + len(processed_sequence)
             modified_nodes.clear()
