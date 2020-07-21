@@ -1,4 +1,6 @@
 import sys
+import os
+import psutil
 from math import log, floor, ceil
 from collections import deque
 
@@ -159,6 +161,12 @@ class Main:
         if(self.pass_no > 1):
             # need to see which big patterns got infrequent
             self.inc_sp_tree_functionalities.InitiateRemovingFromBottom(self.head_recursive_extension_end_linked_list_ptr, minimum_support_threshold)
+
+    def MemoryUsage(self):
+        process = psutil.Process(os.getpid())
+        current_memory = process.memory_info().rss # in bytes
+        print(current_memory)
+
 
 
 
