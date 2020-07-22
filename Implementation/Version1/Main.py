@@ -127,6 +127,9 @@ class Main:
         return
 
     def InitiateCompleteMining(self):
+        # root node contains complete frequency
+        self.bpfsptree_root.support = self.total_database_size
+
         for key in self.complete_set_of_modified_nodes:
             if(self.single_item_freq_table.get(key) == None):
                 self.single_item_freq_table[key] = 0
@@ -135,7 +138,6 @@ class Main:
         minimum_support_threshold = int(ceil((self.percentage_threshold * self.total_database_size)/(100.0)))
         for key in self.complete_set_of_modified_nodes:
             if(self.single_item_freq_table[key]>= minimum_support_threshold):
-                print(key, self.single_item_freq_table[key], minimum_support_threshold)
                 # some updates: somes frequency will increase and some will fail
                 # updating the recursive extension end linked list pointer
                 self.inc_sp_tree_functionalities.UpdateRecursiveExtensionEndListPtr(self.current_recursive_extension_end_linked_list_ptr)
@@ -151,7 +153,8 @@ class Main:
                         self.UpdatingABPFSPTreeNode(key, self.single_item_freq_table[key], self.complete_set_of_new_created_nodes[key])
                     else:
                         self.UpdatingABPFSPTreeNode(key, self.single_item_freq_table[key], [])
-                self.inc_sp_tree_functionalities.IncrementalTreeMiner(self.complete_set_of_modified_nodes[key], [key], 1<<key, s_list, i_list, bpfsptree_node.freq_seq_ex_child_nodes[key], self.cetables, self.cetablei, minimum_support_threshold, self.pass_no)
+                
+                self.inc_sp_tree_functionalities.IncrementalTreeMiner(self.complete_set_of_modified_nodes[key], [[key]], 1<<key, s_list, i_list, self.bpfsptree_root.freq_seq_ex_child_nodes[key], self.cetables, self.cetablei, minimum_support_threshold, self.pass_no)
                 self.current_recursive_extension_end_linked_list_ptr = self.inc_sp_tree_functionalities.GetUpdateRecursiveExtensionEndListPtr()
                 # completed all the works
             else:
