@@ -153,7 +153,7 @@ class Main:
                         self.UpdatingABPFSPTreeNode(key, self.single_item_freq_table[key], self.complete_set_of_new_created_nodes[key])
                     else:
                         self.UpdatingABPFSPTreeNode(key, self.single_item_freq_table[key], [])
-                
+
                 self.inc_sp_tree_functionalities.IncrementalTreeMiner(self.complete_set_of_modified_nodes[key], [[key]], 1<<key, s_list, i_list, self.bpfsptree_root.freq_seq_ex_child_nodes[key], self.cetables, self.cetablei, minimum_support_threshold, self.pass_no)
                 self.current_recursive_extension_end_linked_list_ptr = self.inc_sp_tree_functionalities.GetUpdateRecursiveExtensionEndListPtr()
                 # completed all the works
@@ -173,6 +173,8 @@ class Main:
             # updating with the current pointer
             self.current_recursive_extension_end_linked_list_ptr = self.inc_sp_tree_functionalities.GetUpdateRecursiveExtensionEndListPtr()
             # completed all the works
+        # Printing the bi directional projection pointer based frequent sequential pattern tree
+        self.PrintBPFSPTree(self.bpfsptree_root,[])
 
 
     def MemoryUsage(self):
@@ -199,6 +201,22 @@ class Main:
             print("item = ",key)
             for key1 in self.cetablei[key]:
                 print("(",key1,self.cetablei[key][key1],")")
+    def PrintBPFSPTree(self, bpfsptree_node, pattern):
+        if(len(pattern)>0):
+            print("pattern = ",pattern)
+            print("support = ",bpfsptree_node.support)
+        for key in bpfsptree_node.freq_seq_ex_child_nodes:
+            pattern.append([key])
+            self.PrintBPFSPTree(bpfsptree_node.freq_seq_ex_child_nodes[key], pattern)
+            del pattern[len(pattern)-1]
+        sz = ""
+        if(len(pattern) > 0):
+            sz = len(pattern[len(pattern)-1])
+        for key in bpfsptree_node.freq_item_ex_child_nodes:
+            pattern[len(pattern)-1].append(key)
+            self.PrintBPFSPTree(bpfsptree_node.freq_item_ex_child_nodes[key], pattern)
+            del pattern[len(pattern)-1][sz]
+        return
 
 #sys.stdin = open('input.txt','r')
 #sys.stdout = open('output.txt','w')

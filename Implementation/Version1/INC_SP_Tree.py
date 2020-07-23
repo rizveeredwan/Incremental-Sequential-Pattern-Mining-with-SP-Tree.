@@ -467,7 +467,6 @@ class INC_SP_Tree_Functionalities:
         return
 
     def IncrementalTreeMiner(self, modified_node_list, pattern, last_event_item_bitset, s_list, i_list, bpfsptree_node, cetables, cetablei, minimum_support_threshold, pass_no):
-        print("current pattern = ",pattern, bpfsptree_node.support)
         global current_recursive_extension_end_linked_list_ptr
 
         actual_support, over_support,over_support1, complete_over_support = 0,0,0,0
