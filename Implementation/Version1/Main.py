@@ -48,7 +48,6 @@ class Main:
 
     def DatabaseInput(self):
         self.new_input = int(input())
-        self.total_database_size = self.total_database_size + self.new_input
         line = ""
         sid = -1
         processed_sequence = []
@@ -58,24 +57,28 @@ class Main:
         modified_nodes = {}
         self.complete_set_of_modified_nodes.clear()
         self.complete_set_of_new_created_nodes.clear()
+        count_flag = 0
         for i in range(0,self.new_input):
             line = input()
             sid, processed_sequence = self.ProcessSequence(line)
             value = self.seq_sum_dict.get(sid)
             new_items.clear()
+            count_flag = 0
             if(value == None):
                 #new sequence
+                self.total_database_size = self.total_database_size + 1
                 self.seq_sum_dict[sid] = SequenceSummarizerStructure()
                 self.seq_sum_dict[sid].sp_tree_end_node_ptr = self.inc_sp_tree_root
                 self.seq_sum_dict[sid].last_event_no = -1
                 value = self.seq_sum_dict[sid]
+                count_flag = 1
             end_sp_tree_node = self.inc_sp_tree_functionalities.Insert(self.pass_no, value.sp_tree_end_node_ptr , processed_sequence, 0, 0, value.last_event_no, value, 0, new_items)
             value.sp_tree_end_node_ptr = end_sp_tree_node
             value.UpdateCETables(new_items, self.cetables, value, value.last_event_no)
             value.UpdateCETablei(new_items, self.cetablei, value)
             value.last_event_no = value.last_event_no + len(processed_sequence)
             modified_nodes.clear()
-            self.inc_sp_tree_functionalities.UpdatePath(end_sp_tree_node, self.pass_no, {}, modified_nodes)
+            self.inc_sp_tree_functionalities.UpdatePath(end_sp_tree_node, self.pass_no, {}, modified_nodes, count_flag)
             for key in modified_nodes:
                 if(self.complete_set_of_modified_nodes.get(key) == None):
                     self.complete_set_of_modified_nodes[key] = []
@@ -174,6 +177,7 @@ class Main:
             self.current_recursive_extension_end_linked_list_ptr = self.inc_sp_tree_functionalities.GetUpdateRecursiveExtensionEndListPtr()
             # completed all the works
         # Printing the bi directional projection pointer based frequent sequential pattern tree
+        print("Printing Tree")
         self.PrintBPFSPTree(self.bpfsptree_root,[])
 
 
@@ -221,7 +225,7 @@ class Main:
 #sys.stdin = open('input.txt','r')
 #sys.stdout = open('output.txt','w')
 
-directory = '../Dataset/Testing-Dataset'
+directory = '../Dataset/Dataset2'
 
 main = Main()
 # read percentage threshold and iteration count

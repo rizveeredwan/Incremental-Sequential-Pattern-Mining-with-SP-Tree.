@@ -82,12 +82,11 @@ class INC_SP_Tree_Functionalities:
             new_items[item]=True
         return self.Insert(pass_no, node, processed_sequence, event_no, item_no+1, actual_event_no, sequence_summarizer_structure, event_bitset | (1<<item), new_items)
 
-    def UpdatePath(self, node, pass_no, next_link_nodes, modified_nodes):
+    def UpdatePath(self, node, pass_no, next_link_nodes, modified_nodes, count_flag):
         if(node == None):
             return
         last_modified = node.modified_at
         if(node.modified_at<pass_no):
-            first_time_touched = True
             node.modified_at=pass_no
             node.previous_count=node.present_count
             if(node.item != ""):
@@ -97,7 +96,7 @@ class INC_SP_Tree_Functionalities:
             # this modified node is already tracked
             if(node.item != "" and modified_nodes.get(node.item) != None):
                 del modified_nodes[node.item]
-        node.present_count=node.present_count+1
+        node.present_count=node.present_count+count_flag
 
         for key in next_link_nodes:
             value = node.next_link.get(key)
@@ -115,7 +114,7 @@ class INC_SP_Tree_Functionalities:
         else:
             if(next_link_nodes.get(node.item) != None):
                 del next_link_nodes[node.item]
-        self.UpdatePath(node.parent_node, pass_no, next_link_nodes, modified_nodes)
+        self.UpdatePath(node.parent_node, pass_no, next_link_nodes, modified_nodes, count_flag)
         return
 
     # # DEBUG:
@@ -199,7 +198,7 @@ class INC_SP_Tree_Functionalities:
                             failed_nodes.append(new_node)
 
         if(over_support < minimum_support_threshold):
-            return over_support, actual_support, complete_over_support, next_level_new_nodes, modified_nodes, False # Not frequent
+            return over_support, actual_support, complete_over_support, new_created_nodes, modified_nodes, False # Not frequent
 
         for i in range(0,len(failed_nodes)):
             list = failed_nodes[i].next_link.get(item)
@@ -215,9 +214,9 @@ class INC_SP_Tree_Functionalities:
                 checked_all = False
                 if(i == len(failed_nodes)-1):
                     checked_all = True
-                return over_support, actual_support, complete_over_support, next_level_new_nodes, modified_nodes, checked_all
+                return over_support, actual_support, complete_over_support, new_created_nodes, modified_nodes, checked_all
 
-        return over_support, actual_support, complete_over_support, next_level_new_nodes, modified_nodes, True
+        return over_support, actual_support, complete_over_support, new_created_nodes , modified_nodes, True
 
     def SequenceExtensionForUnmodifiedPart(self, node_list, item):
         next_level_nodes = []
@@ -809,7 +808,7 @@ class INC_SP_Tree_Functionalities:
                 break # completed all the checking
             if(recursive_extension_end_linked_list_ptr.bpfsptree_node_ptr.support < minimum_support_threshold):
                 save_previous = recursive_extension_end_linked_list_ptr.previous_list_ptr
-                self.PruningBPFSPBranchFromBottom(recursive_extension_end_linked_list_ptr.bpfsptree_node_ptr)
+                self.PruningBPFSPBranchFromBottom(recursive_extension_end_linked_list_ptr.bpfsptree_node_ptr, minimum_support_threshold)
                 recursive_extension_end_linked_list_ptr = save_previous
         return
     def PritnNodeList(self,node_list):
