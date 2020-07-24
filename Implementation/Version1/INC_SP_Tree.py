@@ -119,7 +119,7 @@ class INC_SP_Tree_Functionalities:
 
     # # DEBUG:
     def PrintINCSPTree(self, node):
-        print("id = ",node.node_id, "( item, event, count ) = ( ", node.item, node.event_no, node.present_count," )")
+        print("id = ",node.node_id, "( item, event, count ) = ( ", node.item, node.event_no, node.present_count," ), parent_bitset = ",node.parent_item_bitset)
         for key in node.child_link:
             for key2 in node.child_link[key]:
                 self.PrintINCSPTree(node.child_link[key][key2])
@@ -152,7 +152,6 @@ class INC_SP_Tree_Functionalities:
 
         if(over_support < minimum_support_threshold):
             return over_support, actual_support, next_level_nodes, modified_nodes, False # not satisfied
-
 
         for i in range(0,len(failed_nodes)):
             actual_support = actual_support - failed_nodes[i].present_count
@@ -276,7 +275,7 @@ class INC_SP_Tree_Functionalities:
                 for j in range(0,len(list)):
                     new_node = list[j]
                     actual_support = actual_support + new_node.present_count
-                    if(new_node.event_no == node_list[i].event_no):
+                    if((new_node.parent_item_bitset & last_event_item_bitset) == last_event_item_bitset):
                         next_level_nodes.append(new_node)
                         if(new_node.modified_at == pass_no):
                             modified_nodes.append(new_node)
@@ -320,7 +319,7 @@ class INC_SP_Tree_Functionalities:
                 for j in range(0,len(list)):
                     if(list[j].modified_at == pass_no):
                         actual_support = actual_support + list[j].present_count - list[j].previous_count
-                        if(list[j].event_no ==  node_list[i].event_no):
+                        if((list[j].parent_item_bitset & last_event_item_bitset) == last_event_item_bitset):
                             modified_nodes.append(list[j])
                             if(list[j].created_at == pass_no):
                                 new_created_nodes.append(list[j])
@@ -357,7 +356,7 @@ class INC_SP_Tree_Functionalities:
             list = node_list[i].next_link.get(item)
             if(list != None):
                 for j in range(0,len(list)):
-                    if(list[j].event_no == node_list[i].event_no):
+                    if((list[j].parent_item_bitset & last_event_item_bitset) == last_event_item_bitset):
                         next_level_nodes.append(list[j])
                     else:
                         q.put(list[j])
@@ -381,7 +380,7 @@ class INC_SP_Tree_Functionalities:
             if(list != None):
                 for j in range(0,len(list)):
                     if(list[j].modified_at < pass_no):
-                        if(list[j].event_no == node_list[i].event_no):
+                        if((list[j].parent_item_bitset & last_event_item_bitset) == last_event_item_bitset):
                             next_level_nodes.append(list[j])
                         else:
                             q.put(list[j])
@@ -465,9 +464,13 @@ class INC_SP_Tree_Functionalities:
         del bpfsptree_node
         return
 
+    def GettingFirstItem(self, item_bitset):
+        item = item_bitset ^ (item_bitset-1)
+        item = int(floor(log(item,2)))
+        return item
+
     def IncrementalTreeMiner(self, modified_node_list, pattern, last_event_item_bitset, s_list, i_list, bpfsptree_node, cetables, cetablei, minimum_support_threshold, pass_no):
         global current_recursive_extension_end_linked_list_ptr
-
         actual_support, over_support,over_support1, complete_over_support = 0,0,0,0
         sequence_extended_modified_sp_tree_nodes={}
         itemset_extended_modified_sp_tree_nodes={}
@@ -486,10 +489,11 @@ class INC_SP_Tree_Functionalities:
         heuristic_s_list_wise_i_list_pruning = {}
 
         # sequence extension
-        new_s_list = deque()
-        i_list_from_s_list = deque()
-        while len(s_list) > 0 :
-            symbol = s_list.popleft()
+        new_s_list = 0
+        i_list_from_s_list = 0
+        while s_list > 0 :
+            symbol = self.GettingFirstItem(s_list)
+            s_list = s_list & (s_list-1)
             verdict = True
             for j in range(0,len(pattern[len(pattern)-1])):
                 if(cetables.get(pattern[len(pattern)-1][j]) == None or cetables[pattern[len(pattern)-1][j]].get(symbol) == None or cetables[pattern[len(pattern)-1][j]][symbol] < minimum_support_threshold):
@@ -509,8 +513,7 @@ class INC_SP_Tree_Functionalities:
                         # saving the nodes for future extension
                         if(len(modified_nodes)>0):
                             sequence_extended_modified_sp_tree_nodes[symbol] = modified_nodes
-                            new_s_list.append(symbol)
-                            i_list_from_s_list.append(symbol)
+                            new_s_list = new_s_list | (1<<symbol)
 
                         # saving the newly created nodes in the BPFSP Tree
                         for j in range(0,len(new_created_nodes)):
@@ -566,8 +569,7 @@ class INC_SP_Tree_Functionalities:
 
                             # saving the modified nodes for future extension
                             sequence_extended_modified_sp_tree_nodes[symbol] = modified_nodes
-                            new_s_list.append(symbol)
-                            i_list_from_s_list.append(symbol)
+                            new_s_list = new_s_list | (1<<symbol)
 
                             # as we have complete over support
                             # over support from (modified to modified),(unmodified to unmodified),(modified to unmodified)
@@ -588,7 +590,6 @@ class INC_SP_Tree_Functionalities:
                     else:
                         # completely new item
                         over_support, actual_support, next_level_nodes, modified_nodes, checked_all = self.SequenceExtensionNormal(bpfsptree_node.projection_nodes, symbol, minimum_support_threshold, pass_no, bpfsptree_node.support)
-
                         if(actual_support >= minimum_support_threshold):
 
                             # create a new branch
@@ -601,8 +602,7 @@ class INC_SP_Tree_Functionalities:
 
                             # saving the nodes for future extension
                             sequence_extended_modified_sp_tree_nodes[symbol] = modified_nodes
-                            new_s_list.append(symbol)
-                            i_list_from_s_list.append(symbol)
+                            new_s_list = new_s_list | 1<<symbol
 
                             # calculated over complete tree - valid over support
                             if(over_support < minimum_support_threshold):
@@ -635,9 +635,12 @@ class INC_SP_Tree_Functionalities:
                         pass
 
         # item set extension
-        new_i_list = deque()
-        while len(i_list)>0:
-            symbol = i_list.popleft()
+        new_i_list = 0
+        while i_list>0:
+
+            symbol = self.GettingFirstItem(i_list)
+            i_list = i_list & (i_list-1)
+
             # heuristic i list checking
             if(heuristic_s_list_wise_i_list_pruning.get(symbol) == None):
                 # cetable i pruning
@@ -657,7 +660,8 @@ class INC_SP_Tree_Functionalities:
                             # keeping the modified nodes for further extension
                             if(len(modified_nodes) > 0):
                                 itemset_extended_modified_sp_tree_nodes[symbol]= modified_nodes
-                                new_i_list.append(symbol)
+                                new_i_list = new_i_list | (1<<symbol)
+
                             # updating the BPFSP Tree with new nodes
                             for j in range(0,len(new_created_nodes)):
                                 bpfsptree_node.freq_item_ex_child_nodes[symbol].projection_nodes.append(new_created_nodes[j])
@@ -709,7 +713,7 @@ class INC_SP_Tree_Functionalities:
 
                                 # saving the modified nodes for future extension
                                 itemset_extended_modified_sp_tree_nodes[symbol] = modified_nodes
-                                new_i_list.append(symbol)
+                                new_i_list = new_i_list | (1<<symbol)
 
                                 # completed all the works
                             else:
@@ -723,6 +727,7 @@ class INC_SP_Tree_Functionalities:
                         else:
                             # it is not in the TB
                             actual_support, next_level_nodes, modified_nodes, checked_all = self.ItemsetExtensionNormal(bpfsptree_node.projection_nodes, symbol, minimum_support_threshold, pass_no, last_event_item_bitset, bpfsptree_node.support)
+
                             if( actual_support >= minimum_support_threshold):
                                 # creating a new BPFSP Tree node
                                 bpfsptree_node.freq_item_ex_child_nodes[symbol] = BPFSP_Tree()
@@ -734,7 +739,7 @@ class INC_SP_Tree_Functionalities:
 
                                 #saving the nodes for further extension
                                 itemset_extended_modified_sp_tree_nodes[symbol] = modified_nodes
-                                new_i_list.append(symbol)
+                                new_i_list = new_i_list | (1<<symbol)
 
                             else:
                                 if(checked_all == True):
@@ -770,23 +775,25 @@ class INC_SP_Tree_Functionalities:
 
         # Recursive Extension
         # sequence Extension
+
+        i_list_from_s_list = new_s_list
         for key in sequence_extended_modified_sp_tree_nodes:
-            while len(i_list_from_s_list)>0:
-                value = i_list_from_s_list.popleft()
+            while i_list_from_s_list>0:
+                value = self.GettingFirstItem(i_list_from_s_list)
                 if(value > key):
-                    i_list_from_s_list.appendleft(value)
                     break
+                i_list_from_s_list = i_list_from_s_list & (i_list_from_s_list-1)
             pattern.append([key])
             self.IncrementalTreeMiner(sequence_extended_modified_sp_tree_nodes[key], pattern, 1<<key, new_s_list, i_list_from_s_list, bpfsptree_node.freq_seq_ex_child_nodes[key], cetables, cetablei, minimum_support_threshold, pass_no)
             del pattern[len(pattern)-1]
         # itemset extension
         sz = len(pattern[len(pattern)-1])
         for key in itemset_extended_modified_sp_tree_nodes:
-            while len(new_i_list) > 0:
-                value = new_i_list.popleft()
+            while new_i_list > 0:
+                value = self.GettingFirstItem(new_i_list)
                 if(value > key):
-                    new_i_list.appendleft(value)
                     break
+                new_i_list = new_i_list & (new_i_list-1)
             pattern[len(pattern)-1].append(key)
             self.IncrementalTreeMiner(itemset_extended_modified_sp_tree_nodes[key], pattern, last_event_item_bitset | 1<< key, new_s_list, new_i_list, bpfsptree_node.freq_item_ex_child_nodes[key], cetables, cetablei, minimum_support_threshold, pass_no)
             del pattern[len(pattern)-1][sz]

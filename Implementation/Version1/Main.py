@@ -90,21 +90,21 @@ class Main:
                     self.complete_set_of_new_created_nodes[key].append(modified_nodes[key])
 
     def MakingSList(self, item, minimum_support_threshold):
-        s_list = deque()
+        s_list = 0
         if(self.cetables.get(item) == None):
             return s_list
         for key in self.cetables[item]:
             if(self.cetables[item][key] >= minimum_support_threshold):
-                s_list.append(key)
+                s_list = s_list | 1 << key
         return s_list
 
     def MakingIList(self, item, minimum_support_threshold):
-        i_list = deque()
+        i_list = 0
         if(self.cetablei.get(item) == None):
             return i_list
         for key in self.cetablei[item]:
             if(key > item and self.cetablei[item][key] >= minimum_support_threshold):
-                i_list.append(key)
+                i_list = i_list | 1 << key
         return i_list
 
     def CreatingNodeFromBPFSPTree(self, item, actual_support, projection_nodes, pass_no):
@@ -225,7 +225,7 @@ class Main:
 #sys.stdin = open('input.txt','r')
 #sys.stdout = open('output.txt','w')
 
-directory = '../Dataset/Dataset2'
+directory = '../Dataset/Dataset3'
 
 main = Main()
 # read percentage threshold and iteration count
