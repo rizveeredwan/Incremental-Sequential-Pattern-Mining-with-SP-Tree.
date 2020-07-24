@@ -225,7 +225,7 @@ class Main:
 #sys.stdin = open('input.txt','r')
 #sys.stdout = open('output.txt','w')
 
-directory = '../Dataset/Dataset3'
+directory = '../Dataset/Dataset4'
 
 main = Main()
 # read percentage threshold and iteration count
