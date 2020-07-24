@@ -82,7 +82,7 @@ class INC_SP_Tree_Functionalities:
             new_items[item]=True
         return self.Insert(pass_no, node, processed_sequence, event_no, item_no+1, actual_event_no, sequence_summarizer_structure, event_bitset | (1<<item), new_items)
 
-    def UpdatePath(self, node, pass_no, next_link_nodes, modified_nodes, count_flag):
+    def UpdatePath(self, node, pass_no, next_link_nodes, modified_nodes, addition_type, last_node_previously, last_node_found):
         if(node == None):
             return
         last_modified = node.modified_at
@@ -96,7 +96,21 @@ class INC_SP_Tree_Functionalities:
             # this modified node is already tracked
             if(node.item != "" and modified_nodes.get(node.item) != None):
                 del modified_nodes[node.item]
-        node.present_count=node.present_count+count_flag
+
+        if(last_node_found == False and last_node_previously != ""):
+            if(last_node_previously == node):
+                last_node_found = True
+                
+        if(addition_type == True):
+            # complete new addition
+            node.present_count=node.present_count+1
+        elif(addition_type == False):
+            # just appending in the end
+            if(last_node_found == True):
+                pass
+            elif(last_node_found == False):
+                # last node not found: so need to increment for newer symbols
+                node.present_count=node.present_count+1
 
         for key in next_link_nodes:
             value = node.next_link.get(key)
@@ -114,7 +128,7 @@ class INC_SP_Tree_Functionalities:
         else:
             if(next_link_nodes.get(node.item) != None):
                 del next_link_nodes[node.item]
-        self.UpdatePath(node.parent_node, pass_no, next_link_nodes, modified_nodes, count_flag)
+        self.UpdatePath(node.parent_node, pass_no, next_link_nodes, modified_nodes, addition_type, last_node_previously, last_node_found)
         return
 
     # # DEBUG:

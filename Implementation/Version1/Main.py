@@ -57,13 +57,15 @@ class Main:
         modified_nodes = {}
         self.complete_set_of_modified_nodes.clear()
         self.complete_set_of_new_created_nodes.clear()
-        count_flag = 0
+        addition_type = ""
+        last_node_previously = ""
         for i in range(0,self.new_input):
             line = input()
             sid, processed_sequence = self.ProcessSequence(line)
             value = self.seq_sum_dict.get(sid)
             new_items.clear()
             count_flag = 0
+            addition_type = False
             if(value == None):
                 #new sequence
                 self.total_database_size = self.total_database_size + 1
@@ -71,14 +73,19 @@ class Main:
                 self.seq_sum_dict[sid].sp_tree_end_node_ptr = self.inc_sp_tree_root
                 self.seq_sum_dict[sid].last_event_no = -1
                 value = self.seq_sum_dict[sid]
-                count_flag = 1
+                addition_type = True
+                last_node_previously = ""
+            else:
+                addition_type = False # appending
+                last_node_previously = self.seq_sum_dict[sid].sp_tree_end_node_ptr
+
             end_sp_tree_node = self.inc_sp_tree_functionalities.Insert(self.pass_no, value.sp_tree_end_node_ptr , processed_sequence, 0, 0, value.last_event_no, value, 0, new_items)
             value.sp_tree_end_node_ptr = end_sp_tree_node
             value.UpdateCETables(new_items, self.cetables, value, value.last_event_no)
             value.UpdateCETablei(new_items, self.cetablei, value)
             value.last_event_no = value.last_event_no + len(processed_sequence)
             modified_nodes.clear()
-            self.inc_sp_tree_functionalities.UpdatePath(end_sp_tree_node, self.pass_no, {}, modified_nodes, count_flag)
+            self.inc_sp_tree_functionalities.UpdatePath(end_sp_tree_node, self.pass_no, {}, modified_nodes, addition_type, last_node_previously, False)
             for key in modified_nodes:
                 if(self.complete_set_of_modified_nodes.get(key) == None):
                     self.complete_set_of_modified_nodes[key] = []
@@ -225,7 +232,7 @@ class Main:
 #sys.stdin = open('input.txt','r')
 #sys.stdout = open('output.txt','w')
 
-directory = '../Dataset/Dataset4'
+directory = '../Dataset/Dataset5'
 
 main = Main()
 # read percentage threshold and iteration count
