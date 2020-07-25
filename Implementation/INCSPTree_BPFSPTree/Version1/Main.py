@@ -184,7 +184,7 @@ class Main:
             self.current_recursive_extension_end_linked_list_ptr = self.inc_sp_tree_functionalities.GetUpdateRecursiveExtensionEndListPtr()
             # completed all the works
         # Printing the bi directional projection pointer based frequent sequential pattern tree
-        print("Printing Tree")
+        #print("Printing Tree")
         self.PrintBPFSPTree(self.bpfsptree_root,[])
 
 
@@ -214,8 +214,8 @@ class Main:
                 print("(",key1,self.cetablei[key][key1],")")
     def PrintBPFSPTree(self, bpfsptree_node, pattern):
         if(len(pattern)>0):
-            print("pattern = ",pattern)
-            print("support = ",bpfsptree_node.support)
+            print(pattern)
+            print(bpfsptree_node.support)
         for key in bpfsptree_node.freq_seq_ex_child_nodes:
             pattern.append([key])
             self.PrintBPFSPTree(bpfsptree_node.freq_seq_ex_child_nodes[key], pattern)
@@ -232,7 +232,7 @@ class Main:
 #sys.stdin = open('input.txt','r')
 #sys.stdout = open('output.txt','w')
 
-directory = '../Dataset/Dataset7'
+directory = '../Dataset/Dataset8'
 
 main = Main()
 # read percentage threshold and iteration count
@@ -243,6 +243,7 @@ input_file_name = ''
 for i in range(1,main.iteration_count_input+1):
     input_file_name = directory+'/in'+str(i)+'.txt'
     sys.stdin = open(input_file_name,'r')
+    sys.stdout = open(directory+'/out'+str(i)+'.txt','w')
     # INC SP Tree build complete
     main.DatabaseInput()
     # Now need to mine
