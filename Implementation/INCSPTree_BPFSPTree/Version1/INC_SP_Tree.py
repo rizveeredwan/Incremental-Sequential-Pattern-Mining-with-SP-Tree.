@@ -100,7 +100,7 @@ class INC_SP_Tree_Functionalities:
         if(last_node_found == False and last_node_previously != ""):
             if(last_node_previously == node):
                 last_node_found = True
-                
+
         if(addition_type == True):
             # complete new addition
             node.present_count=node.present_count+1
@@ -201,8 +201,10 @@ class INC_SP_Tree_Functionalities:
                     new_node = list[j]
                     if(new_node.modified_at == pass_no):
                         complete_over_support = complete_over_support + new_node.present_count
-                        over_support = over_support + new_node.present_count - new_node.previous_count
-                        actual_support = actual_support + new_node.present_count - new_node.previous_count
+                        if(new_node.previous_count < new_node.present_count):
+                            # this is additional support frequency
+                            over_support = over_support + new_node.present_count - new_node.previous_count
+                            actual_support = actual_support + new_node.present_count - new_node.previous_count
                         if(new_node.event_no>node_list[i].event_no):
                             modified_nodes.append(new_node)
                             if(new_node.created_at == pass_no):
@@ -215,11 +217,13 @@ class INC_SP_Tree_Functionalities:
 
         for i in range(0,len(failed_nodes)):
             list = failed_nodes[i].next_link.get(item)
-            actual_support = actual_support - failed_nodes[i].present_count + failed_nodes[i].previous_count
+            if(failed_nodes[i].previous_count < failed_nodes[i].present_count):
+                actual_support = actual_support - failed_nodes[i].present_count + failed_nodes[i].previous_count
             if(list != None):
                 for j in range(0,len(list)):
                     if(list[j].modified_at == pass_no):
-                        actual_support = actual_support + list[j].present_count - list[j].previous_count
+                        if(list[j].previous_count < list[j].present_count):
+                            actual_support = actual_support + list[j].present_count - list[j].previous_count
                         modified_nodes.append(list[j])
                         if(list[j].created_at == pass_no):
                             new_created_nodes.append(list[j])
@@ -332,7 +336,8 @@ class INC_SP_Tree_Functionalities:
             if(list != None):
                 for j in range(0,len(list)):
                     if(list[j].modified_at == pass_no):
-                        actual_support = actual_support + list[j].present_count - list[j].previous_count
+                        if(list[j].previous_count < list[j].present_count):
+                            actual_support = actual_support + list[j].present_count - list[j].previous_count
                         if((list[j].parent_item_bitset & last_event_item_bitset) == last_event_item_bitset):
                             modified_nodes.append(list[j])
                             if(list[j].created_at == pass_no):
@@ -344,12 +349,14 @@ class INC_SP_Tree_Functionalities:
 
         while(q.qsize()>0):
             new_node = q.get()
-            actual_support = actual_support - new_node.present_count + new_node.previous_count
+            if(new_node.previous_count < new_node.present_count):
+                actual_support = actual_support - new_node.present_count + new_node.previous_count
             list = new_node.next_link.get(item)
             if(list != None):
                 for i in range(0,len(list)):
                     if(list[i].modified_at == pass_no):
-                        actual_support = actual_support + list[i].present_count - list[i].previous_count
+                        if(list[i].previous_count < list[i].present_count):
+                            actual_support = actual_support + list[i].present_count - list[i].previous_count
                         if((list[i].parent_item_bitset & last_event_item_bitset) == last_event_item_bitset):
                             modified_nodes.append(list[i])
                             if(list[i].created_at == pass_no):
@@ -832,9 +839,9 @@ class INC_SP_Tree_Functionalities:
                 self.PruningBPFSPBranchFromBottom(recursive_extension_end_linked_list_ptr.bpfsptree_node_ptr, minimum_support_threshold)
                 recursive_extension_end_linked_list_ptr = save_previous
         return
-    def PritnNodeList(self,node_list):
+    def PrintNodeList(self,node_list):
         for i in range(0,len(node_list)):
-            print("node id = ",node_list[i].node_id)
+            print("node id = ",node_list[i].node_id," support = ",node_list[i].present_count)
             self.PrintNextLink(node_list[i])
     def PrintNextLink(self,node):
         for key in node.next_link:

@@ -79,6 +79,7 @@ class Main:
                 addition_type = False # appending
                 last_node_previously = self.seq_sum_dict[sid].sp_tree_end_node_ptr
 
+
             end_sp_tree_node = self.inc_sp_tree_functionalities.Insert(self.pass_no, value.sp_tree_end_node_ptr , processed_sequence, 0, 0, value.last_event_no, value, 0, new_items)
             value.sp_tree_end_node_ptr = end_sp_tree_node
             value.UpdateCETables(new_items, self.cetables, value, value.last_event_no)
@@ -144,7 +145,8 @@ class Main:
             if(self.single_item_freq_table.get(key) == None):
                 self.single_item_freq_table[key] = 0
             for i in range(0, len(self.complete_set_of_modified_nodes[key])):
-                self.single_item_freq_table[key] = self.single_item_freq_table[key] + self.complete_set_of_modified_nodes[key][i].present_count - self.complete_set_of_modified_nodes[key][i].previous_count
+                if(self.complete_set_of_modified_nodes[key][i].previous_count < self.complete_set_of_modified_nodes[key][i].present_count):
+                    self.single_item_freq_table[key] = self.single_item_freq_table[key] + self.complete_set_of_modified_nodes[key][i].present_count - self.complete_set_of_modified_nodes[key][i].previous_count
         minimum_support_threshold = int(ceil((self.percentage_threshold * self.total_database_size)/(100.0)))
         for key in self.complete_set_of_modified_nodes:
             if(self.single_item_freq_table[key]>= minimum_support_threshold):
@@ -232,7 +234,7 @@ class Main:
 #sys.stdin = open('input.txt','r')
 #sys.stdout = open('output.txt','w')
 
-directory = '../Dataset/Dataset8'
+directory = '../Dataset/Dataset2'
 
 main = Main()
 # read percentage threshold and iteration count

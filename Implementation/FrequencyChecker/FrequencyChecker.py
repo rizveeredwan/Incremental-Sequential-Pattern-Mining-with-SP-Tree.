@@ -49,6 +49,8 @@ class FrequencyChecker:
         return full_patt
 
     def ReadGeneratedPatterns(self, pattern_file_name):
+        self.patterns_support=[]
+        self.patterns=[]
         with open(pattern_file_name, 'r') as file:
             lines = file.readlines()
             for i in range(0,len(lines),2):
@@ -103,11 +105,19 @@ class FrequencyChecker:
                 matched = False
         print("Match status = ", matched)
 
+    def ReadMetadataFile(self, file_name):
+        with open(file_name,'r') as file:
+            lines = file.readlines()
+            self.iteration_count = int(lines[1].strip())
 
-database_file = 'E:\Research\Incremental-Sequential-Pattern-Mining\Incremental-Sequential-Pattern-Mining-with-SP-Tree\Implementation\INCSPTree_BPFSPTree\Dataset\Dataset8\in1.txt'
-pattern_file = 'E:\Research\Incremental-Sequential-Pattern-Mining\Incremental-Sequential-Pattern-Mining-with-SP-Tree\Implementation\INCSPTree_BPFSPTree\Dataset\Dataset8\out1.txt'
+file_directory = 'E:\Research\Incremental-Sequential-Pattern-Mining\Incremental-Sequential-Pattern-Mining-with-SP-Tree\Implementation\INCSPTree_BPFSPTree\Dataset\Dataset2'
 
 freq_checker = FrequencyChecker()
-freq_checker.ReadDB(database_file)
-freq_checker.ReadGeneratedPatterns(pattern_file)
-freq_checker.SanityChecking()
+freq_checker.ReadMetadataFile(file_directory+'\metadata.txt')
+for i in range(0,freq_checker.iteration_count):
+    input_file_name = file_directory+"\in"+str(i+1)+'.txt'
+    freq_checker.ReadDB(input_file_name)
+    pattern_file =  file_directory+"\out"+str(i+1)+'.txt'
+    freq_checker.ReadGeneratedPatterns(pattern_file)
+    freq_checker.SanityChecking()
+    print(pattern_file+" checking done\n\n")
