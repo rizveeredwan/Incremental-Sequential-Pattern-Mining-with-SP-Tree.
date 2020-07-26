@@ -1,0 +1,37 @@
+Printing Tree
+10 0
+called  0 0
+Printing Tree
+10 0
+called  28237 14230
+<BPFSP_Tree.RecursiveExtensionEndLinkedListPtr object at 0x000001F0087C7A48>
+SHITTTT
+end prev update korsi
+current - previous:  <BPFSP_Tree.RecursiveExtensionEndLinkedListPtr object at 0x000001F0087C7A48>
+current - next:  <BPFSP_Tree.RecursiveExtensionEndLinkedListPtr object at 0x000001F0087CE088>
+previous - previous:  <BPFSP_Tree.RecursiveExtensionEndLinkedListPtr object at 0x000001F0087C7A48>
+previous - next:  <BPFSP_Tree.RecursiveExtensionEndLinkedListPtr object at 0x000001F0087CE088>
+change korsilam:  <BPFSP_Tree.RecursiveExtensionEndLinkedListPtr object at 0x000001F0087CE088>
+Printing Tree
+10 0
+called  28315 14269
+<BPFSP_Tree.RecursiveExtensionEndLinkedListPtr object at 0x000001F0087C7A48>
+SHITTTT
+end prev update korsi
+current - previous:  <BPFSP_Tree.RecursiveExtensionEndLinkedListPtr object at 0x000001F0087C7A48>
+current - next:  <BPFSP_Tree.RecursiveExtensionEndLinkedListPtr object at 0x000001F0087CE088>
+previous - previous:  <BPFSP_Tree.RecursiveExtensionEndLinkedListPtr object at 0x000001F0087C7A48>
+previous - next:  <BPFSP_Tree.RecursiveExtensionEndLinkedListPtr object at 0x000001F0087CE088>
+change korsilam:  <BPFSP_Tree.RecursiveExtensionEndLinkedListPtr object at 0x000001F0087CE088>
+Printing Tree
+10 0
+called  32426 16316
+<BPFSP_Tree.RecursiveExtensionEndLinkedListPtr object at 0x000001F0087C7A48>
+SHITTTT
+end prev update korsi
+current - previous:  <BPFSP_Tree.RecursiveExtensionEndLinkedListPtr object at 0x000001F0087C7A48>
+current - next:  <BPFSP_Tree.RecursiveExtensionEndLinkedListPtr object at 0x000001F0087CE088>
+previous - previous:  <BPFSP_Tree.RecursiveExtensionEndLinkedListPtr object at 0x000001F0087C7A48>
+previous - next:  <BPFSP_Tree.RecursiveExtensionEndLinkedListPtr object at 0x000001F0087CE088>
+change korsilam:  <BPFSP_Tree.RecursiveExtensionEndLinkedListPtr object at 0x000001F0087CE088>
+Printing Tree

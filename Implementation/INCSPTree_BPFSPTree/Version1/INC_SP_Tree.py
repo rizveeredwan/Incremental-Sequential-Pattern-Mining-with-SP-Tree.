@@ -3,8 +3,8 @@ from BPFSP_Tree import BPFSP_Tree, RecursiveExtensionEndLinkedListPtr
 from math import log, floor
 from collections import deque
 
-current_recursive_extension_end_linked_list_ptr = ""
 total_created_node_count = 0
+debug_pattern = ""
 
 class ItemEventCombination:
     def __init__(self,item,event):
@@ -29,8 +29,8 @@ class INC_SP_Tree_Node:
 
 class INC_SP_Tree_Functionalities:
 
-    def __init__(self):
-        pass
+    def __init__(self, current_recursive_extension_end_linked_list_ptr):
+        self.current_recursive_extension_end_linked_list_ptr = current_recursive_extension_end_linked_list_ptr
 
     def SequenceSummarizerSequenceExtensionUpdate(self, sequence_summarizer_structure, item, event_no):
         value = sequence_summarizer_structure.sequence_summarizer_table.get(item)
@@ -134,6 +134,7 @@ class INC_SP_Tree_Functionalities:
     # # DEBUG:
     def PrintINCSPTree(self, node):
         print("id = ",node.node_id, "( item, event, count ) = ( ", node.item, node.event_no, node.present_count," ), parent_bitset = ",node.parent_item_bitset)
+        print("previous = ",node.previous_count, "present = ",node.present_count)
         for key in node.child_link:
             for key2 in node.child_link[key]:
                 self.PrintINCSPTree(node.child_link[key][key2])
@@ -326,6 +327,7 @@ class INC_SP_Tree_Functionalities:
         return actual_support, next_level_nodes, modified_nodes, True
 
     def ItemsetExtensionIncremental(self, node_list, item, minimum_support_threshold, pass_no, last_event_item_bitset, current_support):
+        global debug_pattern
         actual_support = current_support
         list = []
         modified_nodes = []
@@ -336,6 +338,8 @@ class INC_SP_Tree_Functionalities:
             if(list != None):
                 for j in range(0,len(list)):
                     if(list[j].modified_at == pass_no):
+                        if(debug_pattern == True):
+                            print(list[j].item, list[j].parent_item_bitset, list[j].previous_count, list[j].present_count,list[j].modified_at,list[j].created_at,pass_no)
                         if(list[j].previous_count < list[j].present_count):
                             actual_support = actual_support + list[j].present_count - list[j].previous_count
                         if((list[j].parent_item_bitset & last_event_item_bitset) == last_event_item_bitset):
@@ -427,28 +431,24 @@ class INC_SP_Tree_Functionalities:
 
 
     def AdjustRecursiveExtensionEndListPtr(self, bpfsptree_node):
-        global current_recursive_extension_end_linked_list_ptr
-        recursive_extension_end_linked_list_ptr = bpfsptree_node.recursive_extension_end_linked_list_ptr
-        recursive_extension_end_linked_list_ptr.previous_list_ptr.next_list_ptr = recursive_extension_end_linked_list_ptr.next_list_ptr
-        if(recursive_extension_end_linked_list_ptr.next_list_ptr == None):
+        bpfsptree_node.prev.next = bpfsptree_node.next
+        if(bpfsptree_node.next != None):
+            bpfsptree_node.next.prev = bpfsptree_node.prev
+        if(bpfsptree_node.next == None):
             # previous node is becoming the leaf node
-            current_recursive_extension_end_linked_list_ptr = recursive_extension_end_linked_list_ptr.previous_list_ptr
-        bpfsptree_node.recursive_extension_end_linked_list_ptr = None
-        del recursive_extension_end_linked_list_ptr
+            self.current_recursive_extension_end_linked_list_ptr = bpfsptree_node.prev
+        bpfsptree_node.prev = None
+        bpfsptree_node.next = None
         return
 
-    def CreateNeRecursiveExtensionEndListPtr(self, present_recursive_extension_end_linked_list_ptr, bpfsptree_node):
-        new_recursive_extension_end_linked_list_ptr = RecursiveExtensionEndLinkedListPtr()
-        new_recursive_extension_end_linked_list_ptr.bpfsptree_node_ptr = bpfsptree_node
-        new_recursive_extension_end_linked_list_ptr.previous_list_ptr = present_recursive_extension_end_linked_list_ptr
-        new_recursive_extension_end_linked_list_ptr.next_list_ptr = None
-
-        present_recursive_extension_end_linked_list_ptr.next_list_ptr = new_recursive_extension_end_linked_list_ptr
-        bpfsptree_node.recursive_extension_end_linked_list_ptr = new_recursive_extension_end_linked_list_ptr
-        return new_recursive_extension_end_linked_list_ptr
+    def CreateNewRecursiveExtensionEndListPtr(self, bpfsptree_node):
+        self.current_recursive_extension_end_linked_list_ptr.next = bpfsptree_node
+        bpfsptree_node.prev  = self.current_recursive_extension_end_linked_list_ptr
+        bpfsptree_node.next = None
+        self.current_recursive_extension_end_linked_list_ptr = bpfsptree_node
+        return
 
     def PruningBPFSPBranchFromBottom(self, bpfsptree_node, minimum_support_threshold):
-        global current_recursive_extension_end_linked_list_ptr
         unsatisfied_node = bpfsptree_node
         while(True):
             # detecting the topmost unsatisfied_node
@@ -462,26 +462,28 @@ class INC_SP_Tree_Functionalities:
         elif(unsatisfied_node.connection_type_with_parent == False):
             del unsatisfied_node.parent_node.freq_item_ex_child_nodes[unsatisfied_node.item]
         self.BPFSPSubTreePruning(unsatisfied_node)
-        if(save_parent_node.parent_node != None and len(save_parent_node.freq_seq_ex_child_nodes)==0 and len(save_parent_node.freq_item_ex_child_nodes) == 0):
+
+        if(save_parent_node.parent_node != None and len(save_parent_node.freq_seq_ex_child_nodes) == 0 and len(save_parent_node.freq_item_ex_child_nodes) == 0):
             # A new leaf node is created
-            current_recursive_extension_end_linked_list_ptr = self.CreateNeRecursiveExtensionEndListPtr(current_recursive_extension_end_linked_list_ptr, save_parent_node)
+            self.CreateNewRecursiveExtensionEndListPtr(save_parent_node)
         return
 
     def BPFSPSubTreePruning(self, bpfsptree_node):
-        global current_recursive_extension_end_linked_list_ptr
         for key in bpfsptree_node.freq_seq_ex_child_nodes:
             self.BPFSPSubTreePruning(bpfsptree_node.freq_seq_ex_child_nodes[key])
         del bpfsptree_node.freq_seq_ex_child_nodes
         for key in bpfsptree_node.freq_item_ex_child_nodes:
             self.BPFSPSubTreePruning(bpfsptree_node.freq_item_ex_child_nodes[key])
         del bpfsptree_node.freq_item_ex_child_nodes
-        if(bpfsptree_node.recursive_extension_end_linked_list_ptr != None):
+        if(bpfsptree_node.prev != None):
             # it was an end node before
-            bpfsptree_node.recursive_extension_end_linked_list_ptr.previous_list_ptr.next_list_ptr = bpfsptree_node.recursive_extension_end_linked_list_ptr.next_list_ptr
-            if(bpfsptree_node.recursive_extension_end_linked_list_ptr.previous_list_ptr.next_list_ptr == None):
+            bpfsptree_node.prev.next = bpfsptree_node.next
+            if(bpfsptree_node.next != None):
+                bpfsptree_node.next.prev = bpfsptree_node.prev
+            if(bpfsptree_node.next == None):
                 # it is the last node
-                current_recursive_extension_end_linked_list_ptr = bpfsptree_node.recursive_extension_end_linked_list_ptr.previous_list_ptr
-            del bpfsptree_node.recursive_extension_end_linked_list_ptr
+                self.current_recursive_extension_end_linked_list_ptr = bpfsptree_node.prev
+                # current update korsi
         del bpfsptree_node
         return
 
@@ -491,7 +493,6 @@ class INC_SP_Tree_Functionalities:
         return item
 
     def IncrementalTreeMiner(self, modified_node_list, pattern, last_event_item_bitset, s_list, i_list, bpfsptree_node, cetables, cetablei, minimum_support_threshold, pass_no):
-        global current_recursive_extension_end_linked_list_ptr
         actual_support, over_support,over_support1, complete_over_support = 0,0,0,0
         sequence_extended_modified_sp_tree_nodes={}
         itemset_extended_modified_sp_tree_nodes={}
@@ -526,7 +527,6 @@ class INC_SP_Tree_Functionalities:
                 if(bpfsptree_node.freq_seq_ex_child_nodes.get(symbol) != None):
                     # already pattern in the tree , update the frequency and take decision
                     over_support, actual_support, complete_over_support, new_created_nodes, modified_nodes, checked_all  =  self.SequenceExtensionIncremental(modified_node_list, symbol, minimum_support_threshold, pass_no, bpfsptree_node.freq_seq_ex_child_nodes[symbol].support )
-
                     if(actual_support >= minimum_support_threshold):
                         # previously frequent and again frequent
                         # update the existing frequency only
@@ -547,6 +547,7 @@ class INC_SP_Tree_Functionalities:
                             bpfsptree_node.non_freq_seq_ex_support[symbol] = actual_support
                         # need to prune a branch
                         self.BPFSPSubTreePruning(bpfsptree_node.freq_seq_ex_child_nodes[symbol])
+                        #print("pruning call disi(se): ",bpfsptree_node.freq_seq_ex_child_nodes[symbol])
                         del bpfsptree_node.freq_seq_ex_child_nodes[symbol]
                         # completed all the works
                 else:
@@ -578,15 +579,15 @@ class INC_SP_Tree_Functionalities:
                                 bpfsptree_node.freq_seq_ex_child_nodes[symbol].projection_nodes.append(unmodified_nodes_for_extension[j])
 
                             # getting the unmodified nodes from parent node's modified section
-                            over_support2, unmodified_nodes_for_extension = self.SequenceExtensionFromModifiedToUnmodified(self, modified_node_list, item, pass_no)
+                            over_support2, unmodified_nodes_for_extension = self.SequenceExtensionFromModifiedToUnmodified(modified_node_list, symbol, pass_no)
 
                             # saving the projection unmodified nodes from modified nodes in BPFSP Tree
                             for j in range(0,len(unmodified_nodes_for_extension)):
                                 bpfsptree_node.freq_seq_ex_child_nodes[symbol].projection_nodes.append(unmodified_nodes_for_extension[j])
 
                             # saving the projection new nodes in in BPFSP Tree
-                            for j in range(0, len(new_created_nodes)):
-                                bpfsptree_node.freq_seq_ex_child_nodes[symbol].projection_nodes.append(new_created_nodes[j])
+                            for j in range(0, len(modified_nodes)):
+                                bpfsptree_node.freq_seq_ex_child_nodes[symbol].projection_nodes.append(modified_nodes[j])
 
                             # saving the modified nodes for future extension
                             sequence_extended_modified_sp_tree_nodes[symbol] = modified_nodes
@@ -640,6 +641,7 @@ class INC_SP_Tree_Functionalities:
                 if(bpfsptree_node.freq_seq_ex_child_nodes.get(symbol) != None):
                     # Need to remove the pattern from the tree
                     self.BPFSPSubTreePruning(bpfsptree_node.freq_seq_ex_child_nodes[symbol])
+                    #print("Pruning call disi(se): ",bpfsptree_node.freq_seq_ex_child_nodes[symbol])
                     del bpfsptree_node.freq_seq_ex_child_nodes[symbol]
                     # completed all the works
                 else:
@@ -694,13 +696,16 @@ class INC_SP_Tree_Functionalities:
                                 bpfsptree_node.non_freq_item_ex_support[symbol] = actual_support
                             # pruning a subtree
                             self.BPFSPSubTreePruning(bpfsptree_node.freq_item_ex_child_nodes[symbol])
+                            #print("Pruning call disi: ", bpfsptree_node.freq_item_ex_child_nodes[symbol])
                             del bpfsptree_node.freq_item_ex_child_nodes[symbol]
+
                             # completed all the works
                     else:
                         # not in the frequent pattern tree
                         if(bpfsptree_node.non_freq_item_ex_support.get(symbol) != None):
                             # it is in the TLB
                             actual_support, modified_nodes, new_created_nodes, checked_all = self.ItemsetExtensionIncremental(modified_node_list, symbol, minimum_support_threshold, pass_no, last_event_item_bitset, bpfsptree_node.non_freq_item_ex_support[symbol])
+
                             if(actual_support >= minimum_support_threshold):
                                 # previously non frequent was in TLB getting frequent now
                                 del bpfsptree_node.non_freq_item_ex_support[symbol]
@@ -710,14 +715,16 @@ class INC_SP_Tree_Functionalities:
                                 bpfsptree_node.freq_item_ex_child_nodes[symbol].parent_node = bpfsptree_node
                                 bpfsptree_node.freq_item_ex_child_nodes[symbol].item = symbol
                                 bpfsptree_node.freq_item_ex_child_nodes[symbol].support = actual_support
-                                bpfsptree_node.freq_seq_ex_child_nodes[symbol].connection_type_with_parent = False # Itemset extension
+                                bpfsptree_node.freq_item_ex_child_nodes[symbol].connection_type_with_parent = False # Itemset extension
 
                                 # getting the previous unmodified nodes from the parent node's unmodifed nodes
                                 if(unmodified_node_list_calculated == False):
                                     # if unmodified_node_list not calculate first calculate it
                                     unmodified_node_list = self.GettingUnmodifiedNodes(bpfsptree_node, pass_no)
                                     unmodified_node_list_calculated = True
+
                                 unmodified_nodes = self.ItemsetExtensionForUnmodifiedPart(unmodified_node_list, symbol, last_event_item_bitset)
+
 
                                 # saving the previous unmodified nodes
                                 for j in range(0,len(unmodified_nodes)):
@@ -725,12 +732,13 @@ class INC_SP_Tree_Functionalities:
 
                                 # getting the unmodified nodes from the modified nodes
                                 unmodified_nodes = self.ItemsetExtensionFromModifiedToUnmodified(modified_node_list, symbol, last_event_item_bitset, pass_no)
+
                                 for j in range(0,len(unmodified_nodes)):
                                     bpfsptree_node.freq_item_ex_child_nodes[symbol].projection_nodes.append(unmodified_nodes[j])
 
                                 # saving the new nodes
-                                for j in range(0, len(new_created_nodes)):
-                                    bpfsptree_node.freq_item_ex_child_nodes[symbol].projection_nodes.append(new_created_nodes[j])
+                                for j in range(0, len(modified_nodes)):
+                                    bpfsptree_node.freq_item_ex_child_nodes[symbol].projection_nodes.append(modified_nodes[j])
 
                                 # saving the modified nodes for future extension
                                 itemset_extended_modified_sp_tree_nodes[symbol] = modified_nodes
@@ -770,6 +778,7 @@ class INC_SP_Tree_Functionalities:
                     if(bpfsptree_node.freq_item_ex_child_nodes.get(symbol) != None):
                         # need to prune a subtree from BPFSP Tree
                         self.BPFSPSubTreePruning(bpfsptree_node.freq_item_ex_child_nodes[symbol])
+                        #print("Pruning call disi: ", bpfsptree_node.freq_item_ex_child_nodes[symbol])
                         del bpfsptree_node.freq_item_ex_child_nodes[symbol]
                         # completed all the works
                     else:
@@ -780,18 +789,17 @@ class INC_SP_Tree_Functionalities:
                             # non frequent, non in TLB also, nothing to do
                             # completed all the works
                             pass
-
         if(len(bpfsptree_node.freq_seq_ex_child_nodes) > 0 or len(bpfsptree_node.freq_item_ex_child_nodes) > 0):
             # this node is not end of recursive extension
-            if(bpfsptree_node.recursive_extension_end_linked_list_ptr != None):
+            if(bpfsptree_node.prev != None):
                 # it was an end previously - need to remove it
                 self.AdjustRecursiveExtensionEndListPtr(bpfsptree_node)
                 # completed all the works
         else:
             # this is the end of recursive extension
-            if(bpfsptree_node.recursive_extension_end_linked_list_ptr == None):
+            if(bpfsptree_node.prev == None):
                 # need to create the end linked list pointer
-                current_recursive_extension_end_linked_list_ptr = self.CreateNeRecursiveExtensionEndListPtr(current_recursive_extension_end_linked_list_ptr, bpfsptree_node)
+                self.CreateNewRecursiveExtensionEndListPtr(bpfsptree_node)
                 # completed all the works
 
         # Recursive Extension
@@ -820,23 +828,37 @@ class INC_SP_Tree_Functionalities:
             del pattern[len(pattern)-1][sz]
         return
 
-    def UpdateRecursiveExtensionEndListPtr(self, new_recursive_extension_end_linked_list_ptr):
-        global current_recursive_extension_end_linked_list_ptr
-        current_recursive_extension_end_linked_list_ptr = new_recursive_extension_end_linked_list_ptr
-        return
-    def GetUpdateRecursiveExtensionEndListPtr(self):
-        global current_recursive_extension_end_linked_list_ptr
-        return current_recursive_extension_end_linked_list_ptr
+    def PrintRecursiveLinks(self,bpfsptree_node):
+        temp = bpfsptree_node
+        print("item = ", bpfsptree_node.item, bpfsptree_node, temp.prev,temp.next)
+        if(bpfsptree_node.parent_node != ""):
+            print("parent = ",bpfsptree_node.parent_node.item)
+        while(temp != None):
+            temp = temp.prev
+            if(temp == None or temp.parent_node == ""):
+                break
+            else:
+                print("prev item ",temp.item, "parent item ",temp.parent_node.item,temp,temp.prev,temp.next)
+                if(temp.parent_node != "" and temp.parent_node.parent_node != "" and temp.parent_node.parent_node != ""  ):
+                    print("parent parent  = ",temp.parent_node.parent_node.item)
+        temp = bpfsptree_node
+        while(temp != None):
+            temp = temp.next
+            if(temp == None):
+                break
+            else:
+                print("next item = ",temp.item, "parent item ",temp.parent_node.item)
+
     def InitiateRemovingFromBottom(self, recursive_extension_end_linked_list_ptr, minimum_support_threshold):
         # the root starter will be sent: so start from the next
         save_previous = ""
         while True:
-            recursive_extension_end_linked_list_ptr = recursive_extension_end_linked_list_ptr.next_list_ptr
+            recursive_extension_end_linked_list_ptr = recursive_extension_end_linked_list_ptr.next
             if(recursive_extension_end_linked_list_ptr == None):
                 break # completed all the checking
-            if(recursive_extension_end_linked_list_ptr.bpfsptree_node_ptr.support < minimum_support_threshold):
-                save_previous = recursive_extension_end_linked_list_ptr.previous_list_ptr
-                self.PruningBPFSPBranchFromBottom(recursive_extension_end_linked_list_ptr.bpfsptree_node_ptr, minimum_support_threshold)
+            if(recursive_extension_end_linked_list_ptr.support < minimum_support_threshold):
+                save_previous = recursive_extension_end_linked_list_ptr.prev
+                self.PruningBPFSPBranchFromBottom(recursive_extension_end_linked_list_ptr, minimum_support_threshold)
                 recursive_extension_end_linked_list_ptr = save_previous
         return
     def PrintNodeList(self,node_list):

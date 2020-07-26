@@ -7,7 +7,7 @@ from collections import deque
 from INC_SP_Tree import INC_SP_Tree_Node
 from INC_SP_Tree import INC_SP_Tree_Functionalities
 
-from BPFSP_Tree import BPFSP_Tree, RecursiveExtensionEndLinkedListPtr
+from BPFSP_Tree import BPFSP_Tree
 from Sequence_Summarizer_Structure import SequenceSummarizerStructure
 
 class Main:
@@ -16,11 +16,11 @@ class Main:
         self.seq_sum_dict={}
         self.pass_no = 0
         self.inc_sp_tree_root = INC_SP_Tree_Node()
-        self.inc_sp_tree_functionalities = INC_SP_Tree_Functionalities()
+        self.head_recursive_extension_end_linked_list_ptr = BPFSP_Tree()
+        self.current_recursive_extension_end_linked_list_ptr = self.head_recursive_extension_end_linked_list_ptr
+        self.inc_sp_tree_functionalities = INC_SP_Tree_Functionalities(self.current_recursive_extension_end_linked_list_ptr)
         self.cetables={}
         self.cetablei={}
-        self.head_recursive_extension_end_linked_list_ptr = RecursiveExtensionEndLinkedListPtr()
-        self.current_recursive_extension_end_linked_list_ptr = self.head_recursive_extension_end_linked_list_ptr
         self.single_item_freq_table = {}
         self.complete_set_of_modified_nodes={}
         self.total_database_size = 0
@@ -152,7 +152,6 @@ class Main:
             if(self.single_item_freq_table[key]>= minimum_support_threshold):
                 # some updates: somes frequency will increase and some will fail
                 # updating the recursive extension end linked list pointer
-                self.inc_sp_tree_functionalities.UpdateRecursiveExtensionEndListPtr(self.current_recursive_extension_end_linked_list_ptr)
                 s_list = self.MakingSList(key, minimum_support_threshold)
                 i_list = self.MakingIList(key, minimum_support_threshold)
                 if(self.bpfsptree_root.freq_seq_ex_child_nodes.get(key) == None):
@@ -167,26 +166,22 @@ class Main:
                         self.UpdatingABPFSPTreeNode(key, self.single_item_freq_table[key], [])
 
                 self.inc_sp_tree_functionalities.IncrementalTreeMiner(self.complete_set_of_modified_nodes[key], [[key]], 1<<key, s_list, i_list, self.bpfsptree_root.freq_seq_ex_child_nodes[key], self.cetables, self.cetablei, minimum_support_threshold, self.pass_no)
-                self.current_recursive_extension_end_linked_list_ptr = self.inc_sp_tree_functionalities.GetUpdateRecursiveExtensionEndListPtr()
                 # completed all the works
             else:
                 # A complete branch prune
                 if(self.bpfsptree_root.freq_seq_ex_child_nodes.get(key) != None):
                     # already it is in the frequent pattern tree
                     # need to remove it
-                    self.inc_sp_tree_functionalities.UpdateRecursiveExtensionEndListPtr(self.current_recursive_extension_end_linked_list_ptr)
                     self.inc_sp_tree_functionalities.BPFSPSubTreePruning(self.bpfsptree_root.freq_seq_ex_child_nodes[key])
                     del self.bpfsptree_root.freq_seq_ex_child_nodes[key]
-                    self.current_recursive_extension_end_linked_list_ptr = self.inc_sp_tree_functionalities.GetUpdateRecursiveExtensionEndListPtr()
                     # completed all the works
         if(self.pass_no > 1):
             # need to see which big patterns got infrequent
             self.inc_sp_tree_functionalities.InitiateRemovingFromBottom(self.head_recursive_extension_end_linked_list_ptr, minimum_support_threshold)
-            # updating with the current pointer
-            self.current_recursive_extension_end_linked_list_ptr = self.inc_sp_tree_functionalities.GetUpdateRecursiveExtensionEndListPtr()
             # completed all the works
         # Printing the bi directional projection pointer based frequent sequential pattern tree
         #print("Printing Tree")
+        #self.inc_sp_tree_functionalities.PrintINCSPTree(self.inc_sp_tree_root)
         self.PrintBPFSPTree(self.bpfsptree_root,[])
 
 
@@ -231,21 +226,20 @@ class Main:
             del pattern[len(pattern)-1][sz]
         return
 
-#sys.stdin = open('input.txt','r')
-#sys.stdout = open('output.txt','w')
 
-directory = '../Dataset/Dataset2'
+directory = 'E:\Research\Incremental-Sequential-Pattern-Mining\Incremental-Sequential-Pattern-Mining-with-SP-Tree\Implementation\Dataset\Dataset11'
 
 main = Main()
 # read percentage threshold and iteration count
-main.ReadPercentageThresholdAndIterationCount(directory+'/metadata.txt')
+main.ReadPercentageThresholdAndIterationCount(directory+'\metadata.txt')
 
 # pass will start with 1
 input_file_name = ''
+#sys.stdout = open(directory+'\debug'+'.txt','w')
 for i in range(1,main.iteration_count_input+1):
-    input_file_name = directory+'/in'+str(i)+'.txt'
+    input_file_name = directory+'\in'+str(i)+'.txt'
     sys.stdin = open(input_file_name,'r')
-    sys.stdout = open(directory+'/out'+str(i)+'.txt','w')
+    sys.stdout = open(directory+'\out'+str(i)+'.txt','w')
     # INC SP Tree build complete
     main.DatabaseInput()
     # Now need to mine
