@@ -4,7 +4,7 @@ from math import log, floor
 from collections import deque
 
 total_created_node_count = 0
-debug_pattern = ""
+
 
 class ItemEventCombination:
     def __init__(self,item,event):
@@ -327,7 +327,6 @@ class INC_SP_Tree_Functionalities:
         return actual_support, next_level_nodes, modified_nodes, True
 
     def ItemsetExtensionIncremental(self, node_list, item, minimum_support_threshold, pass_no, last_event_item_bitset, current_support):
-        global debug_pattern
         actual_support = current_support
         list = []
         modified_nodes = []
@@ -338,8 +337,6 @@ class INC_SP_Tree_Functionalities:
             if(list != None):
                 for j in range(0,len(list)):
                     if(list[j].modified_at == pass_no):
-                        if(debug_pattern == True):
-                            print(list[j].item, list[j].parent_item_bitset, list[j].previous_count, list[j].present_count,list[j].modified_at,list[j].created_at,pass_no)
                         if(list[j].previous_count < list[j].present_count):
                             actual_support = actual_support + list[j].present_count - list[j].previous_count
                         if((list[j].parent_item_bitset & last_event_item_bitset) == last_event_item_bitset):
