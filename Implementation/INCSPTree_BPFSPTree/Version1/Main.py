@@ -82,12 +82,6 @@ class Main:
 
             end_sp_tree_node = self.inc_sp_tree_functionalities.Insert(self.pass_no, value.sp_tree_end_node_ptr , processed_sequence, 0, 0, value.last_event_no, value, 0, new_items)
             value.sp_tree_end_node_ptr = end_sp_tree_node
-
-            """
-            if(sid == 5):
-                print(new_items, value.sequence_summarizer_table)
-            """
-
             value.UpdateCETables(new_items, self.cetables, value, value.last_event_no)
             value.UpdateCETablei(new_items, self.cetablei, value)
             value.last_event_no = value.last_event_no + len(processed_sequence)
@@ -144,6 +138,7 @@ class Main:
         return
 
     def InitiateCompleteMining(self):
+
         # root node contains complete frequency
         self.bpfsptree_root.support = self.total_database_size
 
@@ -234,7 +229,7 @@ class Main:
         return
 
 
-directory = 'E:\Research\Incremental-Sequential-Pattern-Mining\Incremental-Sequential-Pattern-Mining-with-SP-Tree\Implementation\Dataset\Dataset14'
+directory = 'E:\Research\Incremental-Sequential-Pattern-Mining\Incremental-Sequential-Pattern-Mining-with-SP-Tree\Implementation\Dataset\Dataset12'
 
 main = Main()
 # read percentage threshold and iteration count

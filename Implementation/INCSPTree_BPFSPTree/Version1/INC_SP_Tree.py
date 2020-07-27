@@ -4,7 +4,6 @@ from math import log, floor
 from collections import deque
 
 total_created_node_count = 0
-debug_pattern = ""
 
 
 class ItemEventCombination:
@@ -512,7 +511,6 @@ class INC_SP_Tree_Functionalities:
         return True
 
     def IncrementalTreeMiner(self, modified_node_list, pattern, last_event_item_bitset, s_list, i_list, bpfsptree_node, cetables, cetablei, minimum_support_threshold, pass_no):
-        global debug_pattern
 
         actual_support, over_support,over_support1, complete_over_support = 0,0,0,0
         sequence_extended_modified_sp_tree_nodes={}
@@ -547,12 +545,8 @@ class INC_SP_Tree_Functionalities:
             if(verdict == True):
                 if(bpfsptree_node.freq_seq_ex_child_nodes.get(symbol) != None):
                     # already pattern in the tree , update the frequency and take decision
-                    if(pattern == [[4]] and symbol == 4):
-                        debug_pattern = True
-                    else:
-                        debug_pattern = False
                     over_support, actual_support, complete_over_support, new_created_nodes, modified_nodes, checked_all  =  self.SequenceExtensionIncremental(modified_node_list, symbol, minimum_support_threshold, pass_no, bpfsptree_node.freq_seq_ex_child_nodes[symbol].support )
-                    
+
                     if(actual_support >= minimum_support_threshold):
                         # previously frequent and again frequent
                         # update the existing frequency only

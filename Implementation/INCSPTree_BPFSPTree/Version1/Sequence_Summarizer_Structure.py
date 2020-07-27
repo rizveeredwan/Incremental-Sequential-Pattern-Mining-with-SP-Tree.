@@ -8,7 +8,6 @@ class SequenceSummarizerStructure:
         self.last_event_no=""
 
     def UpdateCETables(self, new_items, cetables, sequence_summarizer_structure, previous_max_event_no):
-        value = ""
         for item1 in sequence_summarizer_structure.sequence_summarizer_table:
             for item2 in new_items:
                 if(sequence_summarizer_structure.sequence_summarizer_table[item1][0][0]<sequence_summarizer_structure.sequence_summarizer_table[item2][0][2]):
@@ -22,6 +21,12 @@ class SequenceSummarizerStructure:
                     else:
                         if(sequence_summarizer_structure.sequence_summarizer_table[item2][0][1] <= sequence_summarizer_structure.sequence_summarizer_table[item1][0][0]):
                             # item1 appeared in this batch
+                            if(cetables.get(item1) == None):
+                                cetables[item1]={}
+                            if(cetables[item1].get(item2) == None):
+                                cetables[item1][item2]=0
+                            cetables[item1][item2] = cetables[item1][item2] + 1
+                        elif(sequence_summarizer_structure.sequence_summarizer_table[item2][0][1] > sequence_summarizer_structure.sequence_summarizer_table[item1][0][0] and sequence_summarizer_structure.sequence_summarizer_table[item2][0][1] > previous_max_event_no):
                             if(cetables.get(item1) == None):
                                 cetables[item1]={}
                             if(cetables[item1].get(item2) == None):

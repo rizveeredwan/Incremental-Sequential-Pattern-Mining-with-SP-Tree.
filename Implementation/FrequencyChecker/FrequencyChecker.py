@@ -88,20 +88,24 @@ class FrequencyChecker:
 
     def SupportMeasureInDB(self, pattern):
         support = 0
+        list = []
         for key in self.database:
             base_pattern = self.database[key]
             value = self.SubPatternChecking(base_pattern, pattern)
             support = support + value
-        return support
+            if(value == 1):
+                list.append(key)
+        return support,list
 
     def SanityChecking(self):
         matched = True
         for i in range(0,len(self.patterns)):
-            found_support = self.SupportMeasureInDB(self.patterns[i])
+            found_support,list = self.SupportMeasureInDB(self.patterns[i])
             calculated_support = self.patterns_support[i]
             if(calculated_support != found_support):
                 print("Support value mismatched")
                 print(self.patterns[i], found_support, calculated_support)
+                print(list)
                 matched = False
         print("Match status = ", matched)
 
@@ -110,7 +114,7 @@ class FrequencyChecker:
             lines = file.readlines()
             self.iteration_count = int(lines[1].strip())
 
-file_directory = 'E:\Research\Incremental-Sequential-Pattern-Mining\Incremental-Sequential-Pattern-Mining-with-SP-Tree\Implementation\Dataset\Dataset14'
+file_directory = 'E:\Research\Incremental-Sequential-Pattern-Mining\Incremental-Sequential-Pattern-Mining-with-SP-Tree\Implementation\Dataset\Dataset12'
 
 freq_checker = FrequencyChecker()
 freq_checker.ReadMetadataFile(file_directory+'\metadata.txt')
