@@ -110,7 +110,7 @@ class FrequencyChecker:
             lines = file.readlines()
             self.iteration_count = int(lines[1].strip())
 
-file_directory = 'E:\Research\Incremental-Sequential-Pattern-Mining\Incremental-Sequential-Pattern-Mining-with-SP-Tree\Implementation\Dataset\Dataset9'
+file_directory = 'E:\Research\Incremental-Sequential-Pattern-Mining\Incremental-Sequential-Pattern-Mining-with-SP-Tree\Implementation\Dataset\Dataset14'
 
 freq_checker = FrequencyChecker()
 freq_checker.ReadMetadataFile(file_directory+'\metadata.txt')

@@ -20,7 +20,7 @@ class SequenceSummarizerStructure:
                             cetables[item1][item2]=0
                         cetables[item1][item2] = cetables[item1][item2] + 1
                     else:
-                        if(sequence_summarizer_structure.sequence_summarizer_table[item2][0][1] <sequence_summarizer_structure.sequence_summarizer_table[item1][0][0]):
+                        if(sequence_summarizer_structure.sequence_summarizer_table[item2][0][1] <= sequence_summarizer_structure.sequence_summarizer_table[item1][0][0]):
                             # item1 appeared in this batch
                             if(cetables.get(item1) == None):
                                 cetables[item1]={}

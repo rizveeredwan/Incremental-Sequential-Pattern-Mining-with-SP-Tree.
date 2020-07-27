@@ -1,10 +1,10 @@
 import random
 
 total_item_count = 10
-iteration_count = 5
-max_sequence_length = 20
-max_number_of_sequence_in_batch=10
-directory_name = 'E:\Research\Incremental-Sequential-Pattern-Mining\Incremental-Sequential-Pattern-Mining-with-SP-Tree\Implementation\INCSPTree_BPFSPTree\Dataset\Dataset9'
+iteration_count = 7
+max_sequence_length = 25
+max_number_of_sequence_in_batch=12
+directory_name = 'E:\Research\Incremental-Sequential-Pattern-Mining\Incremental-Sequential-Pattern-Mining-with-SP-Tree\Implementation\Dataset\Dataset14'
 
 class DatasetGeneration:
     def __init__(self):
@@ -54,6 +54,14 @@ class DatasetGeneration:
                 final_string = final_string + " "+string
         final_string = str(sid)+" "+final_string
         return final_string
+
+    def WriteMergedFile(self, file_directory):
+        with open(file_directory+'/merged.txt', 'w') as file:
+            file.write(str(len(self.complete_database))+'\n')
+            for key in self.complete_database:
+                string = self.ConvertingASequenceToString(key, self.complete_database[key])
+                file.write(string + '\n')
+            file.close()
 
     def Generation(self, directory_name):
         global iteration_count, max_number_of_sequence_in_batch, max_sequence_length
@@ -115,3 +123,4 @@ class DatasetGeneration:
 
 dataset_gen = DatasetGeneration()
 dataset_gen.Generation(directory_name)
+dataset_gen.WriteMergedFile(directory_name)

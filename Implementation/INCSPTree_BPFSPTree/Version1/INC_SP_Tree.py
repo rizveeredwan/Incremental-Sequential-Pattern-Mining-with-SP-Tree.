@@ -4,6 +4,7 @@ from math import log, floor
 from collections import deque
 
 total_created_node_count = 0
+debug_pattern = ""
 
 
 class ItemEventCombination:
@@ -489,7 +490,30 @@ class INC_SP_Tree_Functionalities:
         item = int(floor(log(item,2)))
         return item
 
+    def ReturnNodeCalculatedSupport(self, bpfsptree_node):
+        support = 0
+        for i in range(0,len(bpfsptree_node.projection_nodes)):
+            support = support + bpfsptree_node.projection_nodes[i].present_count
+        return support
+
+    def CheckingIfMergedNodeInTotalNodes(self, bpfsptree_node, modified_node_list):
+        pass_no = modified_node_list[0].modified_at
+        for i in range(0,len(modified_node_list)):
+            if(modified_node_list[i] in bpfsptree_node.projection_nodes):
+                continue
+            else:
+                return False
+        for i in range(0,len(bpfsptree_node.projection_nodes)):
+            if(bpfsptree_node.projection_nodes[i].modified_at == pass_no):
+                if(bpfsptree_node.projection_nodes[i] in modified_node_list):
+                    continue
+                else:
+                    return False
+        return True
+
     def IncrementalTreeMiner(self, modified_node_list, pattern, last_event_item_bitset, s_list, i_list, bpfsptree_node, cetables, cetablei, minimum_support_threshold, pass_no):
+        global debug_pattern
+
         actual_support, over_support,over_support1, complete_over_support = 0,0,0,0
         sequence_extended_modified_sp_tree_nodes={}
         itemset_extended_modified_sp_tree_nodes={}
@@ -523,7 +547,12 @@ class INC_SP_Tree_Functionalities:
             if(verdict == True):
                 if(bpfsptree_node.freq_seq_ex_child_nodes.get(symbol) != None):
                     # already pattern in the tree , update the frequency and take decision
+                    if(pattern == [[4]] and symbol == 4):
+                        debug_pattern = True
+                    else:
+                        debug_pattern = False
                     over_support, actual_support, complete_over_support, new_created_nodes, modified_nodes, checked_all  =  self.SequenceExtensionIncremental(modified_node_list, symbol, minimum_support_threshold, pass_no, bpfsptree_node.freq_seq_ex_child_nodes[symbol].support )
+                    
                     if(actual_support >= minimum_support_threshold):
                         # previously frequent and again frequent
                         # update the existing frequency only
@@ -550,6 +579,7 @@ class INC_SP_Tree_Functionalities:
                 else:
                     # new pattern for which no branch in BPFSP Tree encountered
                     if(bpfsptree_node.non_freq_seq_ex_support.get(symbol) != None):
+
                         # already have the previous frequency in the existing tree  - updating for the new part
                         over_support, actual_support, complete_over_support, new_created_nodes, modified_nodes, checked_all =  self.SequenceExtensionIncremental(modified_node_list, symbol, minimum_support_threshold, pass_no, bpfsptree_node.non_freq_seq_ex_support[symbol])
 
@@ -609,6 +639,7 @@ class INC_SP_Tree_Functionalities:
                     else:
                         # completely new item
                         over_support, actual_support, next_level_nodes, modified_nodes, checked_all = self.SequenceExtensionNormal(bpfsptree_node.projection_nodes, symbol, minimum_support_threshold, pass_no, bpfsptree_node.support)
+
                         if(actual_support >= minimum_support_threshold):
 
                             # create a new branch

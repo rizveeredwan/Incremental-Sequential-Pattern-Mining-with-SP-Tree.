@@ -82,6 +82,12 @@ class Main:
 
             end_sp_tree_node = self.inc_sp_tree_functionalities.Insert(self.pass_no, value.sp_tree_end_node_ptr , processed_sequence, 0, 0, value.last_event_no, value, 0, new_items)
             value.sp_tree_end_node_ptr = end_sp_tree_node
+
+            """
+            if(sid == 5):
+                print(new_items, value.sequence_summarizer_table)
+            """
+
             value.UpdateCETables(new_items, self.cetables, value, value.last_event_no)
             value.UpdateCETablei(new_items, self.cetablei, value)
             value.last_event_no = value.last_event_no + len(processed_sequence)
@@ -154,6 +160,7 @@ class Main:
                 # updating the recursive extension end linked list pointer
                 s_list = self.MakingSList(key, minimum_support_threshold)
                 i_list = self.MakingIList(key, minimum_support_threshold)
+
                 if(self.bpfsptree_root.freq_seq_ex_child_nodes.get(key) == None):
                     # this pattern was not frequent previously
                     self.CreatingNodeFromBPFSPTree(key, self.single_item_freq_table[key], self.complete_set_of_modified_nodes[key], self.pass_no)
@@ -227,7 +234,7 @@ class Main:
         return
 
 
-directory = 'E:\Research\Incremental-Sequential-Pattern-Mining\Incremental-Sequential-Pattern-Mining-with-SP-Tree\Implementation\Dataset\Dataset9'
+directory = 'E:\Research\Incremental-Sequential-Pattern-Mining\Incremental-Sequential-Pattern-Mining-with-SP-Tree\Implementation\Dataset\Dataset14'
 
 main = Main()
 # read percentage threshold and iteration count
