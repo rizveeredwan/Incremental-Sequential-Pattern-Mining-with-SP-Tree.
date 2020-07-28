@@ -141,7 +141,7 @@ class INC_SP_Tree_Functionalities:
         return
 
     def SequenceExtensionNormal(self, node_list, item, minimum_support_threshold, pass_no, current_maximum_support):
-        actual_support = 0
+        actual_support = current_maximum_support
         over_support = current_maximum_support
         new_node = ""
         next_level_nodes=[]
@@ -151,6 +151,7 @@ class INC_SP_Tree_Functionalities:
         for i in range(0,len(node_list)):
             list = node_list[i].next_link.get(item)
             over_support = over_support - node_list[i].present_count
+            actual_support = actual_support - node_list[i].present_count
             if(list != None):
                 for j in range(0,len(list)):
                     new_node = list[j]
@@ -215,6 +216,7 @@ class INC_SP_Tree_Functionalities:
 
         if(over_support < minimum_support_threshold):
             return over_support, actual_support, complete_over_support, new_created_nodes, modified_nodes, False # Not frequent
+
 
         for i in range(0,len(failed_nodes)):
             list = failed_nodes[i].next_link.get(item)
@@ -532,6 +534,7 @@ class INC_SP_Tree_Functionalities:
         # sequence extension
         new_s_list = 0
         i_list_from_s_list = 0
+        temp_list_bitset = s_list
         while s_list > 0 :
             symbol = self.GettingFirstItem(s_list)
             s_list = s_list & (s_list-1)
@@ -544,6 +547,7 @@ class INC_SP_Tree_Functionalities:
 
             if(verdict == True):
                 if(bpfsptree_node.freq_seq_ex_child_nodes.get(symbol) != None):
+
                     # already pattern in the tree , update the frequency and take decision
                     over_support, actual_support, complete_over_support, new_created_nodes, modified_nodes, checked_all  =  self.SequenceExtensionIncremental(modified_node_list, symbol, minimum_support_threshold, pass_no, bpfsptree_node.freq_seq_ex_child_nodes[symbol].support )
 
@@ -679,8 +683,17 @@ class INC_SP_Tree_Functionalities:
                         # completed all the works
                         pass
 
+        # deleting non updated symbols from the TLB
+        save = []
+        for key in bpfsptree_node.non_freq_seq_ex_support:
+            if((1<<key) & temp_list_bitset == 0):
+                save.append(key)
+        for i in range(0,len(save)):
+            del bpfsptree_node.non_freq_seq_ex_support[save[i]]
+
         # item set extension
         new_i_list = 0
+        temp_list_bitset = i_list
         while i_list>0:
 
             symbol = self.GettingFirstItem(i_list)
@@ -811,6 +824,15 @@ class INC_SP_Tree_Functionalities:
                             # non frequent, non in TLB also, nothing to do
                             # completed all the works
                             pass
+
+        # deleting non updated symbols from the TLB
+        save = []
+        for key in bpfsptree_node.non_freq_item_ex_support:
+            if((1<<key) & temp_list_bitset == 0):
+                save.append(key)
+        for i in range(0,len(save)):
+            del bpfsptree_node.non_freq_item_ex_support[save[i]]
+
         if(len(bpfsptree_node.freq_seq_ex_child_nodes) > 0 or len(bpfsptree_node.freq_item_ex_child_nodes) > 0):
             # this node is not end of recursive extension
             if(bpfsptree_node.prev != None):
@@ -823,6 +845,7 @@ class INC_SP_Tree_Functionalities:
                 # need to create the end linked list pointer
                 self.CreateNewRecursiveExtensionEndListPtr(bpfsptree_node)
                 # completed all the works
+
 
         # Recursive Extension
         # sequence Extension
