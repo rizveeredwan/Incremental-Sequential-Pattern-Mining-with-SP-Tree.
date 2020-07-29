@@ -1,10 +1,10 @@
 import random
 
-total_item_count = 10
-iteration_count = 10
-max_sequence_length = 30
-max_number_of_sequence_in_batch=15
-directory_name = 'E:\Research\Incremental-Sequential-Pattern-Mining\Incremental-Sequential-Pattern-Mining-with-SP-Tree\Implementation\Dataset\Dataset15'
+total_item_count = 20
+iteration_count = 30
+max_sequence_length = 40
+max_number_of_sequence_in_batch=25
+directory_name = 'E:\Research\Incremental-Sequential-Pattern-Mining\Incremental-Sequential-Pattern-Mining-with-SP-Tree\Implementation\Dataset\Dataset17'
 
 class DatasetGeneration:
     def __init__(self):
@@ -111,7 +111,7 @@ class DatasetGeneration:
                 elif(verdict == 1):
                     # new sequence
                     total_number_of_sequence = total_number_of_sequence + 1
-                    length = random.randint(0,max_sequence_length-1)
+                    length = random.randint(1,max_sequence_length-1)
                     seq = self.SequenceGeneration(length)
                     self.complete_database[total_number_of_sequence] = seq
                     self.saving_length[total_number_of_sequence] = length

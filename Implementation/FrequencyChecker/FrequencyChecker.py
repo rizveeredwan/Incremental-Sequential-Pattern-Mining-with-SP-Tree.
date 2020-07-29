@@ -35,17 +35,26 @@ class FrequencyChecker:
         patt = patt.strip()
         patt = patt[1:len(patt)-1]
         full_patt = []
-        sub_patt = []
+        sub_patt = ""
         for j in range(0,len(patt)):
-            if(patt[j] == " " or patt[j] == ','):
+            if(patt[j] == " "):
                 continue
             if(patt[j] == '['):
-                sub_patt = []
+                sub_patt = ""
             elif(patt[j] == ']'):
-                full_patt.append(sub_patt)
+                sub_patt = sub_patt.split(',')
+                temp = []
+                for k in range(0,len(sub_patt)):
+                    try:
+                        value = int(sub_patt[k].strip())
+                        temp.append(value)
+                    except Exception as e:
+                        pass
+                if(len(temp)>0):
+                    full_patt.append(temp)
+                sub_patt = ""
             else:
-                value = int(patt[j].strip())
-                sub_patt.append(value)
+                sub_patt = sub_patt + patt[j]
         return full_patt
 
     def ReadGeneratedPatterns(self, pattern_file_name):
@@ -107,14 +116,16 @@ class FrequencyChecker:
                 print(self.patterns[i], found_support, calculated_support)
                 print(list)
                 matched = False
+                return matched
         print("Match status = ", matched)
+        return matched
 
     def ReadMetadataFile(self, file_name):
         with open(file_name,'r') as file:
             lines = file.readlines()
             self.iteration_count = int(lines[1].strip())
 
-file_directory = 'E:\Research\Incremental-Sequential-Pattern-Mining\Incremental-Sequential-Pattern-Mining-with-SP-Tree\Implementation\Dataset\Dataset15'
+file_directory = 'E:\Research\Incremental-Sequential-Pattern-Mining\Incremental-Sequential-Pattern-Mining-with-SP-Tree\Implementation\Dataset\Dataset17'
 
 freq_checker = FrequencyChecker()
 freq_checker.ReadMetadataFile(file_directory+'\metadata.txt')
@@ -123,5 +134,7 @@ for i in range(0,freq_checker.iteration_count):
     freq_checker.ReadDB(input_file_name)
     pattern_file =  file_directory+"\out"+str(i+1)+'.txt'
     freq_checker.ReadGeneratedPatterns(pattern_file)
-    freq_checker.SanityChecking()
+    verdict = freq_checker.SanityChecking()
     print(pattern_file+" checking done\n\n")
+    if(verdict == False):
+        break

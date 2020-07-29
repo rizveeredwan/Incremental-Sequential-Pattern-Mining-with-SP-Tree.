@@ -513,7 +513,7 @@ class INC_SP_Tree_Functionalities:
         return True
 
     def IncrementalTreeMiner(self, modified_node_list, pattern, last_event_item_bitset, s_list, i_list, bpfsptree_node, cetables, cetablei, minimum_support_threshold, pass_no):
-
+        
         actual_support, over_support,over_support1, complete_over_support = 0,0,0,0
         sequence_extended_modified_sp_tree_nodes={}
         itemset_extended_modified_sp_tree_nodes={}
@@ -712,6 +712,7 @@ class INC_SP_Tree_Functionalities:
                     if(bpfsptree_node.freq_item_ex_child_nodes.get(symbol) != None):
                         # already in the frequent pattern tree
                         actual_support, modified_nodes, new_created_nodes, checked_all = self.ItemsetExtensionIncremental(modified_node_list, symbol, minimum_support_threshold, pass_no, last_event_item_bitset, bpfsptree_node.freq_item_ex_child_nodes[symbol].support)
+
                         if(actual_support >= minimum_support_threshold):
                             # already frequent. Update the new frequency
                             bpfsptree_node.freq_item_ex_child_nodes[symbol].support = actual_support
