@@ -3,17 +3,21 @@ from math import ceil
 
 class GSP:
     def __init__(self,directory):
+        self.database={}
         with open(directory+'/metadata.txt','r') as file:
             lines = file.readlines()
             self.iteration_count = int(lines[1].strip())
             self.percentage_threshold = float(lines[0].strip())
             for i in range(1,self.iteration_count+1):
                 input_file_name = directory+'/in'+str(i)+'.txt'
-                sys.stdout = open('gsp-out'+str(i)+'.txt','w')
+                sys.stdout = open('Output/gsp-out'+str(i)+'.txt','w')
                 self.ReadDB(input_file_name)
-                minimum_support_threshold = int(ceil(self.percentage_threshold * len(self.database)))
+                minimum_support_threshold = int(ceil((self.percentage_threshold * len(self.database))/100.0))
                 self.GeneratePatterns(minimum_support_threshold)
+                #print("print patterns")
+                #print(self.generated_patterns[1])
                 self.PrintPatterns()
+
 
     def ProcessSequence(self,line):
         line = line.strip().split(' ')
@@ -68,6 +72,15 @@ class GSP:
                 return 0
         return 1
 
+    def ListCopy(self, list):
+        patt = []
+        for i in range(0,len(list)):
+            temp = []
+            for j in range(0,len(list[i])):
+                temp.append(list[i][j])
+            patt.append(temp)
+        return patt
+
     def TwoPatternMatching(self, pattern1, pattern2):
         sub_patt1 = []
         sub_patt2 = []
@@ -91,15 +104,15 @@ class GSP:
             if(len(temp) > 0):
                 sub_patt2.append(temp)
 
-        if(sub_patt1 == sub_patt2):
+        if(sub_patt1 != sub_patt2):
             return False
         if(len(pattern2[len(pattern2)-1]) == 1):
             # sequence extension
-            join_result = pattern1.copy()
-            join_result.append(pattern2[len(pattern2)-1])
+            join_result = self.ListCopy(pattern1)
+            join_result.append(pattern2[len(pattern2)-1].copy())
         else:
-            join_result = pattern1.copy()
-            join_result[len(join_result)-1].append(pattern2[len(pattern2)-1])
+            join_result =  self.ListCopy(pattern1)
+            join_result[len(join_result)-1].append(pattern2[len(pattern2)-1][len(pattern2[len(pattern2)-1])-1])
         return join_result
 
     def GenerateSubPatternsAndCheck(self, base_pattern, hash_table):
@@ -115,7 +128,7 @@ class GSP:
                             temp.append(base_pattern[k][l])
                     if(len(temp) > 0):
                         sub_patt.append(temp)
-                if(hash_table.get(sub_patt) == None):
+                if(hash_table.get(str(sub_patt)) == None):
                     return False
         return True
 
@@ -123,11 +136,13 @@ class GSP:
         candidate = []
         hash_table = {}
         for i in range(0,len(list_of_patterns)):
-            hash_table[list_of_patterns[i]] =  True
+            hash_table[str(list_of_patterns[i])] =  True
             for j in range(0, len(list_of_patterns)):
                 if(i==j):
                     continue
+                #print("previous list = ",list_of_patterns, list_of_patterns[i],list_of_patterns[j])
                 join_result = self.TwoPatternMatching(list_of_patterns[i],list_of_patterns[j])
+                #print("now = ",list_of_patterns)
                 if(join_result == False):
                     continue
                 candidate.append(join_result)
@@ -140,24 +155,25 @@ class GSP:
             verdict = self.GenerateSubPatternsAndCheck(base_pattern, hash_table)
             if(verdict == True):
                 actual_candidates.append(base_pattern)
-        del hash_table
         return actual_candidates
 
     def FindSingleLengthPatterns(self, minimum_support_threshold):
         temp_dict={}
         freq={}
-        for i in range(0,len(self.database)):
+        for i in self.database:
             temp_dict.clear()
             for j in range(0,len(self.database[i])):
                 for k in range(0,len(self.database[i][j])):
                     temp_dict[self.database[i][j][k]]=True
             for key in temp_dict:
+                if(freq.get(key) == None):
+                    freq[key] = 0
                 freq[key]=freq[key]+1
-        return freq[key]
+        return freq
 
     def FrequencyCalculationOfAPattern(self, pattern):
         support = 0
-        for i in range(0,len(self.database)):
+        for i in self.database:
             support = support + self.SubPatternChecking(self.database[i],pattern)
         return support
 
@@ -166,13 +182,13 @@ class GSP:
         self.generated_patterns[2]=[]
         for i in range(0,len(self.generated_patterns[1])):
             for j in range(0,len(self.generated_patterns[1])):
-                support = self.FrequencyCalculationOfAPattern([[self.generated_patterns[1][i][0]],[self.generated_patterns[1][j][0]]])
+                support = self.FrequencyCalculationOfAPattern([self.generated_patterns[1][i][0][0],self.generated_patterns[1][j][0][0]])
                 if(support >= minimum_support_threshold):
-                    self.generated_patterns[2].append([[[self.generated_patterns[1][i][0]],[self.generated_patterns[1][j][0]]],support])
-                if(self.generated_patterns[1][i][0]<self.generated_patterns[1][j][0]):
-                    support = self.FrequencyCalculationOfAPattern([self.generated_patterns[1][i][0],self.generated_patterns[1][j][0]])
+                    self.generated_patterns[2].append([[self.generated_patterns[1][i][0][0],self.generated_patterns[1][j][0][0]],support])
+                if(self.generated_patterns[1][i][0][0][0]<self.generated_patterns[1][j][0][0][0]):
+                    support = self.FrequencyCalculationOfAPattern([[self.generated_patterns[1][i][0][0][0],self.generated_patterns[1][j][0][0][0]]])
                     if(support >= minimum_support_threshold):
-                        self.generated_patterns[2].append([[self.generated_patterns[1][i][0],self.generated_patterns[1][j][0]],support])
+                        self.generated_patterns[2].append([[[self.generated_patterns[1][i][0][0][0],self.generated_patterns[1][j][0][0][0]]],support])
         return
 
     def GeneratePatterns(self, minimum_support_threshold):
@@ -182,18 +198,22 @@ class GSP:
         self.generated_patterns[1]=[]
         for key in freq:
             if(freq[key] >= minimum_support_threshold):
-                self.generated_patterns[1].append([[key],freq[key]])
+                self.generated_patterns[1].append([[[key]],freq[key]])
         del freq
         # pattern of two length
         self.PatternOfTwoLength(minimum_support_threshold)
         i = 2
         while True:
+            if(self.generated_patterns.get(i) == None or len(self.generated_patterns[i]) == 0):
+                break
             i = i + 1
             list_of_patterns = []
             for j in range(0,len(self.generated_patterns[i-1])):
                 list_of_patterns.append(self.generated_patterns[i-1][j][0])
             candidate, hash_table = self.Join(list_of_patterns)
+            #print("join er pore: ",self.generated_patterns[1])
             candidate = self.Prune(candidate, hash_table)
+            del hash_table
             for j in range(0,len(candidate)):
                 support = self.FrequencyCalculationOfAPattern(candidate[j])
                 if(support >= minimum_support_threshold):
@@ -208,3 +228,6 @@ class GSP:
                 print(self.generated_patterns[key][i][0])
                 print(self.generated_patterns[key][i][1])
         return
+
+directory = 'E:\Research\Incremental-Sequential-Pattern-Mining\Incremental-Sequential-Pattern-Mining-with-SP-Tree\Implementation\Dataset\Dataset2'
+gsp = GSP(directory)
