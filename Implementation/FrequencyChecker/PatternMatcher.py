@@ -19,14 +19,21 @@ class PatternMatcher:
         return True
 
 pattern_matcher = PatternMatcher()
-file1 = 'E:\Research\Incremental-Sequential-Pattern-Mining\Incremental-Sequential-Pattern-Mining-with-SP-Tree\Implementation\Dataset\Dataset2\out1.txt'
-file2 = 'E:\Research\Incremental-Sequential-Pattern-Mining\Incremental-Sequential-Pattern-Mining-with-SP-Tree\Implementation\GSP\Output\gsp-out1.txt'
-dict1 = pattern_matcher.ReadPatterns(file1)
-dict2 = pattern_matcher.ReadPatterns(file2)
-print("Checking Base file Vs Sanity File")
-verdict = pattern_matcher.Matcher(dict1, dict2)
-if(verdict == True):
-    print("Checking Sanity File Vs Base File")
-    verdict = pattern_matcher.Matcher(dict2, dict1)
+counter = 30
+for i in range(1,counter+1):
+    file1 = 'E:\Research\Incremental-Sequential-Pattern-Mining\Incremental-Sequential-Pattern-Mining-with-SP-Tree\Implementation\Dataset\Dataset17\out'+str(i)+'.txt'
+    file2 = 'E:\Research\Incremental-Sequential-Pattern-Mining\Incremental-Sequential-Pattern-Mining-with-SP-Tree\Implementation\GSP\Output\gsp-out'+str(i)+'.txt'
+    print("Matching "+str(i))
+    dict1 = pattern_matcher.ReadPatterns(file1)
+    dict2 = pattern_matcher.ReadPatterns(file2)
+    print("Checking Base file Vs Sanity File")
+    verdict = pattern_matcher.Matcher(dict1, dict2)
     if(verdict == True):
-        print("All matched perfectly")
+        print("Checking Sanity File Vs Base File")
+        verdict = pattern_matcher.Matcher(dict2, dict1)
+        if(verdict == True):
+            print("All matched perfectly")
+        else:
+            break
+    else:
+        break

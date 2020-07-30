@@ -138,8 +138,6 @@ class GSP:
         for i in range(0,len(list_of_patterns)):
             hash_table[str(list_of_patterns[i])] =  True
             for j in range(0, len(list_of_patterns)):
-                if(i==j):
-                    continue
                 #print("previous list = ",list_of_patterns, list_of_patterns[i],list_of_patterns[j])
                 join_result = self.TwoPatternMatching(list_of_patterns[i],list_of_patterns[j])
                 #print("now = ",list_of_patterns)
@@ -229,5 +227,5 @@ class GSP:
                 print(self.generated_patterns[key][i][1])
         return
 
-directory = 'E:\Research\Incremental-Sequential-Pattern-Mining\Incremental-Sequential-Pattern-Mining-with-SP-Tree\Implementation\Dataset\Dataset2'
+directory = 'E:\Research\Incremental-Sequential-Pattern-Mining\Incremental-Sequential-Pattern-Mining-with-SP-Tree\Implementation\Dataset\Dataset17'
 gsp = GSP(directory)
