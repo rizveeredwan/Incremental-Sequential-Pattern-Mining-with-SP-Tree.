@@ -189,8 +189,8 @@ class Main:
 
     def MemoryUsage(self):
         process = psutil.Process(os.getpid())
-        current_memory = process.memory_info().rss # in bytes
-        print(current_memory)
+        current_memory = (process.memory_info().rss/(1024.0*1024.0)) # in bytes
+        print(current_memory, " MB")
 
     def ReadPercentageThresholdAndIterationCount(self, file_name):
         with open(file_name, 'r') as file:
@@ -246,6 +246,8 @@ for i in range(1,main.iteration_count_input+1):
     main.DatabaseInput()
     # Now need to mine
     main.InitiateCompleteMining()
+
+#main.MemoryUsage()
 
 
 
