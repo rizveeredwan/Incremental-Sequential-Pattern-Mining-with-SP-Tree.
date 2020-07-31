@@ -26,6 +26,7 @@ class Main:
         self.complete_set_of_modified_nodes={}
         self.total_database_size = 0
         self.percentage_threshold = 0 # percentage threshold upong will minimum support threshold will vary
+        self.minimum_support_threshold_previous = 0
         self.bpfsptree_root = BPFSP_Tree()
         self.complete_set_of_new_created_nodes = {}
 
@@ -151,6 +152,7 @@ class Main:
                 if(self.complete_set_of_modified_nodes[key][i].previous_count < self.complete_set_of_modified_nodes[key][i].present_count):
                     self.single_item_freq_table[key] = self.single_item_freq_table[key] + self.complete_set_of_modified_nodes[key][i].present_count - self.complete_set_of_modified_nodes[key][i].previous_count
         minimum_support_threshold = int(ceil((self.percentage_threshold * self.total_database_size)/(100.0)))
+
         for key in self.complete_set_of_modified_nodes:
             if(self.single_item_freq_table[key]>= minimum_support_threshold):
                 # some updates: somes frequency will increase and some will fail
@@ -169,7 +171,7 @@ class Main:
                     else:
                         self.UpdatingABPFSPTreeNode(key, self.single_item_freq_table[key], [])
 
-                self.inc_sp_tree_functionalities.IncrementalTreeMiner(self.complete_set_of_modified_nodes[key], [[key]], 1<<key, s_list, i_list, self.bpfsptree_root.freq_seq_ex_child_nodes[key], self.cetables, self.cetablei, minimum_support_threshold, self.pass_no)
+                self.inc_sp_tree_functionalities.IncrementalTreeMiner(self.complete_set_of_modified_nodes[key], [[key]], 1<<key, s_list, i_list, self.bpfsptree_root.freq_seq_ex_child_nodes[key], self.cetables, self.cetablei, minimum_support_threshold, self.pass_no, minimum_support_threshold - self.minimum_support_threshold_previous)
                 # completed all the works
             else:
                 # A complete branch prune
@@ -183,6 +185,8 @@ class Main:
             # need to see which big patterns got infrequent
             self.inc_sp_tree_functionalities.InitiateRemovingFromBottom(self.head_recursive_extension_end_linked_list_ptr, minimum_support_threshold)
             # completed all the works
+        # updating the minimum support threshold
+        self.minimum_support_threshold_previous = minimum_support_threshold
         # Printing the bi directional projection pointer based frequent sequential pattern tree
         #print("Printing Tree")
         #self.inc_sp_tree_functionalities.PrintINCSPTree(self.inc_sp_tree_root)
