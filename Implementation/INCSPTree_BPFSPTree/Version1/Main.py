@@ -3,6 +3,7 @@ import os
 import psutil
 from math import log, floor, ceil
 from collections import deque
+from time import process_time
 
 from INC_SP_Tree import INC_SP_Tree_Node
 from INC_SP_Tree import INC_SP_Tree_Functionalities
@@ -29,6 +30,7 @@ class Main:
         self.complete_set_of_new_created_nodes = {}
 
         self.iteration_count_input = 0 # number of iterations
+        self.start_time = process_time() # for calculation of time
 
 
     def ProcessSequence(self,line):
@@ -186,11 +188,15 @@ class Main:
         #self.inc_sp_tree_functionalities.PrintINCSPTree(self.inc_sp_tree_root)
         self.PrintBPFSPTree(self.bpfsptree_root,[])
 
-
     def MemoryUsage(self):
         process = psutil.Process(os.getpid())
         current_memory = (process.memory_info().rss/(1024.0*1024.0)) # in bytes
         print(current_memory, " MB")
+
+    def CPUTime(self):
+        current_time = process_time()
+        print("elapsed time = ",current_time - self.start_time)
+        self.start_time = current_time
 
     def ReadPercentageThresholdAndIterationCount(self, file_name):
         with open(file_name, 'r') as file:
@@ -229,6 +235,8 @@ class Main:
         return
 
 
+
+
 directory = 'E:\Research\Incremental-Sequential-Pattern-Mining\Incremental-Sequential-Pattern-Mining-with-SP-Tree\Implementation\Dataset\Dataset17'
 
 main = Main()
@@ -246,6 +254,8 @@ for i in range(1,main.iteration_count_input+1):
     main.DatabaseInput()
     # Now need to mine
     main.InitiateCompleteMining()
+    # printing time
+    #main.CPUTime()
 
 #main.MemoryUsage()
 
