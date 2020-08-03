@@ -263,10 +263,6 @@ class INC_SP_Tree_Functionalities:
             if(actual_support < minimum_support_threshold):
                 return over_support, actual_support, next_level_nodes, False
 
-        global debug_pattern
-        if(debug_pattern == True):
-            print("over_support, actual_support = ",over_support, actual_support)
-
         for i in range(0,len(failed_nodes)):
             actual_support = actual_support - failed_nodes[i].present_count
             list = failed_nodes[i].next_link.get(item)
@@ -595,7 +591,6 @@ class INC_SP_Tree_Functionalities:
         return True
 
     def IncrementalTreeMiner(self, modified_node_list, pattern, last_event_item_bitset, s_list, i_list, bpfsptree_node, cetables, cetablei, minimum_support_threshold, pass_no, add_count):
-
         actual_support, over_support,over_support1, complete_over_support, actual_support1, total_node_support = 0,0,0,0,0,0
         sequence_extended_modified_sp_tree_nodes={}
         itemset_extended_modified_sp_tree_nodes={}
@@ -720,6 +715,7 @@ class INC_SP_Tree_Functionalities:
                         # completely new item: not even in the TLB
                         if(pass_no == 1):
                             over_support, actual_support, next_level_nodes, modified_nodes, checked_all = self.SequenceExtensionNormal(bpfsptree_node.projection_nodes, symbol, minimum_support_threshold, pass_no, bpfsptree_node.support)
+
                             if(actual_support >= minimum_support_threshold):
 
                                 # create a new branch
@@ -747,27 +743,28 @@ class INC_SP_Tree_Functionalities:
                         else:
                             # first will look into modified nodes
                             over_support, actual_support, complete_over_support, new_created_nodes, modified_nodes, checked_all, total_node_support  =  self.SequenceExtensionIncremental(modified_node_list, symbol, add_count, pass_no, 0)
+
                             """
-                            if(pattern == [[14], [9]] and symbol == 19):
-                                print("DHUKI EKHANE ",actual_support, minimum_support_threshold, add_count)
-                                global debug_pattern
-                                debug_pattern = True
+                            if(pattern == [[4]] and symbol == 9):
+                                print("DHUKI EKHANE ",actual_support, minimum_support_threshold, add_count, total_node_support)
                                 sum = 0
                                 for i in range(0,len(modified_nodes)):
                                     sum = sum + modified_nodes[i].present_count
                                 print("sum = ",sum)
                             """
 
+
                             if(actual_support >= add_count):
                                 # need to count support in the remaining DB
                                 over_support1, actual_support1, next_level_nodes, checked_all = self.SequenceExtensionNormalExceptModifiedNodes(bpfsptree_node.projection_nodes, symbol, minimum_support_threshold - total_node_support, pass_no, bpfsptree_node.support)
+
                                 """
-                                if(pattern == [[14], [9]] and symbol == 19):
+                                if(pattern == [[4]] and symbol == 9):
                                     print("actual_support1 = ", over_support1, actual_support1, checked_all, len(bpfsptree_node.projection_nodes))
-                                    debug_pattern = False
                                 """
 
-                                if((actual_support+actual_support1) >= minimum_support_threshold):
+
+                                if((total_node_support+actual_support1) >= minimum_support_threshold):
                                     # this pattern got frequent for the first time
 
                                     # create a new branch
@@ -796,7 +793,7 @@ class INC_SP_Tree_Functionalities:
                                         bpfsptree_node.non_freq_seq_ex_support[symbol] = total_node_support + actual_support1
                                         # completed all the works
 
-                                if((over_support + over_support1) < minimum_support_threshold):
+                                if((complete_over_support + over_support1) < minimum_support_threshold):
                                     # heuristic pruning can be applied
                                     heuristic_s_list_wise_i_list_pruning[symbol] =  True
                                     # completed all the works
@@ -841,14 +838,17 @@ class INC_SP_Tree_Functionalities:
             symbol = self.GettingFirstItem(i_list)
             i_list = i_list & (i_list-1)
 
+
             # heuristic i list checking
             if(heuristic_s_list_wise_i_list_pruning.get(symbol) == None):
                 # cetable i pruning
                 verdict = True
+
                 for j in range(0,len(pattern[len(pattern)-1])):
                     if(symbol <= pattern[len(pattern)-1][j] or cetablei.get(pattern[len(pattern)-1][j]) == None or cetablei[pattern[len(pattern)-1][j]].get(symbol) == None or  cetablei[pattern[len(pattern)-1][j]][symbol] < minimum_support_threshold):
                         verdict = False
                         break
+
                 if(verdict == True):
                     # need to check for itemset extension
                     if(bpfsptree_node.freq_item_ex_child_nodes.get(symbol) != None):
@@ -881,6 +881,8 @@ class INC_SP_Tree_Functionalities:
                     else:
                         # not in the frequent pattern tree
                         if(bpfsptree_node.non_freq_item_ex_support.get(symbol) != None):
+
+
                             # it is in the TLB
                             actual_support, modified_nodes, new_created_nodes, checked_all, total_node_support = self.ItemsetExtensionIncremental(modified_node_list, symbol, minimum_support_threshold, pass_no, last_event_item_bitset, bpfsptree_node.non_freq_item_ex_support[symbol])
 
@@ -957,10 +959,12 @@ class INC_SP_Tree_Functionalities:
                             else:
                                 # other iterations
                                 actual_support, modified_nodes, new_created_nodes, checked_all, total_node_support = self.ItemsetExtensionIncremental(modified_node_list, symbol, add_count, pass_no, last_event_item_bitset, 0)
+
                                 if(actual_support >= add_count):
                                     # need to calculate support in the original database
-                                    actual_support1, next_level_nodes, checked_all = self.ItemsetExtensionNormalWithoutModified(modified_node_list, symbol, minimum_support_threshold - total_node_support, pass_no, last_event_item_bitset, 0)
-                                    if((actual_support + actual_support1) >= minimum_support_threshold):
+                                    actual_support1, next_level_nodes, checked_all = self.ItemsetExtensionNormalWithoutModified(bpfsptree_node.projection_nodes, symbol, minimum_support_threshold - total_node_support, pass_no, last_event_item_bitset, bpfsptree_node.support)
+
+                                    if((total_node_support + actual_support1) >= minimum_support_threshold):
                                         # a new frequent pattern is found
 
                                         # creating a new BPFSP Tree node
