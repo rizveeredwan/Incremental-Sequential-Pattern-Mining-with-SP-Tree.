@@ -744,25 +744,9 @@ class INC_SP_Tree_Functionalities:
                             # first will look into modified nodes
                             over_support, actual_support, complete_over_support, new_created_nodes, modified_nodes, checked_all, total_node_support  =  self.SequenceExtensionIncremental(modified_node_list, symbol, add_count, pass_no, 0)
 
-                            """
-                            if(pattern == [[4]] and symbol == 9):
-                                print("DHUKI EKHANE ",actual_support, minimum_support_threshold, add_count, total_node_support)
-                                sum = 0
-                                for i in range(0,len(modified_nodes)):
-                                    sum = sum + modified_nodes[i].present_count
-                                print("sum = ",sum)
-                            """
-
-
                             if(actual_support >= add_count):
                                 # need to count support in the remaining DB
                                 over_support1, actual_support1, next_level_nodes, checked_all = self.SequenceExtensionNormalExceptModifiedNodes(bpfsptree_node.projection_nodes, symbol, minimum_support_threshold - total_node_support, pass_no, bpfsptree_node.support)
-
-                                """
-                                if(pattern == [[4]] and symbol == 9):
-                                    print("actual_support1 = ", over_support1, actual_support1, checked_all, len(bpfsptree_node.projection_nodes))
-                                """
-
 
                                 if((total_node_support+actual_support1) >= minimum_support_threshold):
                                     # this pattern got frequent for the first time
