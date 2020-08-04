@@ -260,6 +260,15 @@ class INC_SP_Tree_Functionalities:
                             next_level_nodes.append(list[j])
                         else:
                             failed_nodes.append(list[j])
+                    elif(list[j].modified_at == pass_no):
+                        if(list[j].event_no > node_list[i].event_no):
+                            # a solution node which is modified: can not be taken
+                            continue
+                        elif(list[j].present_count > 1):
+                            over_support = over_support + list[j].present_count
+                            actual_support = actual_support + list[j].present_count
+                            failed_nodes.append(list[j])
+
             if(actual_support < minimum_support_threshold):
                 return over_support, actual_support, next_level_nodes, False
 
@@ -268,8 +277,9 @@ class INC_SP_Tree_Functionalities:
             list = failed_nodes[i].next_link.get(item)
             if(list != None):
                 for j in range(0,len(list)):
-                    actual_support = actual_support + list[j].present_count
-                    next_level_nodes.append(list[j])
+                    if(list[j].modified_at != pass_no):
+                        actual_support = actual_support + list[j].present_count
+                        next_level_nodes.append(list[j])
             if(actual_support < minimum_support_threshold):
                 if(i == len(failed_nodes)-1):
                     return over_support, actual_support, next_level_nodes, True # all checked
@@ -431,6 +441,12 @@ class INC_SP_Tree_Functionalities:
                             next_level_nodes.append(list[j])
                         else:
                             q.put(list[j])
+                    elif(list[j].modified_at == pass_no):
+                        if((list[j].parent_item_bitset & last_event_item_bitset) != last_event_item_bitset and list[j].present_count>1):
+                            # we need to go there to see if a solution lies in unmodified node
+                            actual_support = actual_support + list[j].present_count
+                            q.put(list[j])
+
             if(actual_support < minimum_support_threshold):
                 return actual_support, next_level_nodes, False
 
@@ -440,11 +456,17 @@ class INC_SP_Tree_Functionalities:
             list = new_node.next_link.get(item)
             if(list != None):
                 for i in range(0,len(list)):
-                    actual_support = actual_support + list[i].present_count
-                    if((list[i].parent_item_bitset & last_event_item_bitset) == last_event_item_bitset):
-                        next_level_nodes.append(list[i])
-                    else:
-                        q.put(list[i])
+                    if(list[i].modified_at < pass_no):
+                        actual_support = actual_support + list[i].present_count
+                        if((list[i].parent_item_bitset & last_event_item_bitset) == last_event_item_bitset):
+                            next_level_nodes.append(list[i])
+                        else:
+                            q.put(list[i])
+                    elif(list[i].modified_at == pass_no):
+                        if((list[i].parent_item_bitset & last_event_item_bitset) != last_event_item_bitset and list[i].present_count>1):
+                            actual_support = actual_support + list[i].present_count
+                            q.put(list[i])
+
             if(actual_support < minimum_support_threshold):
                 if(q.qsize() == 0):
                     return actual_support, next_level_nodes, True
@@ -769,7 +791,6 @@ class INC_SP_Tree_Functionalities:
                                     # saving the nodes for future extension
                                     sequence_extended_modified_sp_tree_nodes[symbol] = modified_nodes
                                     new_s_list = new_s_list | 1<<symbol
-
                                 else:
                                     # not frequent did not satisfy the minimum_support_threshold
                                     if(checked_all == True):
@@ -943,6 +964,8 @@ class INC_SP_Tree_Functionalities:
                             else:
                                 # other iterations
                                 actual_support, modified_nodes, new_created_nodes, checked_all, total_node_support = self.ItemsetExtensionIncremental(modified_node_list, symbol, add_count, pass_no, last_event_item_bitset, 0)
+
+
 
                                 if(actual_support >= add_count):
                                     # need to calculate support in the original database
