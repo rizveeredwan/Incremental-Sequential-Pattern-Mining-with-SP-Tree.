@@ -285,48 +285,6 @@ class INC_SP_Tree_Functionalities:
                 return over_support, actual_support, next_level_nodes, False # all checked
         return over_support, actual_support, next_level_nodes, True
 
-    def SequenceExtensionForUnmodifiedPart(self, node_list, item):
-        next_level_nodes = []
-        failed_nodes = []
-        over_support = 0
-        for i in range(0,len(node_list)):
-            list = node_list[i].next_link.get(item)
-            if(list != None):
-                for j in range(0,len(list)):
-                    over_support = over_support + list[j].present_count
-                    if(list[j].event_no > node_list[i].event_no):
-                        next_level_nodes.append(list[j])
-                    else:
-                        failed_nodes.append(list[j])
-        for i in range(0,len(failed_nodes)):
-            list = failed_nodes[i].next_link.get(item)
-            if(list != None):
-                for j in range(0,len(list)):
-                    next_level_nodes.append(list[j])
-        return over_support, next_level_nodes
-
-    def SequenceExtensionFromModifiedToUnmodified(self, node_list, item, pass_no):
-        next_level_nodes = []
-        failed_nodes = []
-        over_support = 0
-        for i in range(0,len(node_list)):
-            list = node_list[i].next_link.get(item)
-            if(list != None):
-                for j in range(0,len(list)):
-                    if(list[j].modified_at < pass_no):
-                        over_support = over_support + list[j].present_count
-                        if(list[j].event_no > node_list[i].event_no):
-                            next_level_nodes.append(list[j])
-                        else:
-                            failed_nodes.append(list[j])
-        for i in range(0,len(failed_nodes)):
-            list = failed_nodes[i].next_link.get(item)
-            if(list != None):
-                for j in range(0,len(list)):
-                    next_level_nodes.append(list[j])
-        return over_support, next_level_nodes
-
-
     def ItemsetExtensionNormal(self, node_list, item, minimum_support_threshold, pass_no, last_event_item_bitset, current_maximum_support):
         #last event item bitset - all the previous items bitset representation
         actual_support = current_maximum_support
@@ -471,54 +429,6 @@ class INC_SP_Tree_Functionalities:
                     return actual_support, next_level_nodes, True
                 return actual_support, next_level_nodes, False
         return actual_support, next_level_nodes, True
-
-    def ItemsetExtensionForUnmodifiedPart(self, node_list, item, last_event_item_bitset):
-        next_level_nodes=[]
-        q = Queue()
-        for i in range(0,len(node_list)):
-            list = node_list[i].next_link.get(item)
-            if(list != None):
-                for j in range(0,len(list)):
-                    if((list[j].parent_item_bitset & last_event_item_bitset) == last_event_item_bitset):
-                        next_level_nodes.append(list[j])
-                    else:
-                        q.put(list[j])
-        new_node = ""
-        while(q.qsize()>0):
-            new_node = q.get()
-            list = new_node.next_link.get(item)
-            if(list != None):
-                for i in range(0,len(list)):
-                    if((list[i].parent_item_bitset & last_event_item_bitset) == last_event_item_bitset):
-                        next_level_nodes.append(list[i])
-                    else:
-                        q.put(list[i])
-        return next_level_nodes
-
-    def ItemsetExtensionFromModifiedToUnmodified(self, node_list, item, last_event_item_bitset, pass_no):
-        next_level_nodes = []
-        q = Queue()
-        for i in range(0,len(node_list)):
-            list = node_list[i].next_link.get(item)
-            if(list != None):
-                for j in range(0,len(list)):
-                    if(list[j].modified_at < pass_no):
-                        if((list[j].parent_item_bitset & last_event_item_bitset) == last_event_item_bitset):
-                            next_level_nodes.append(list[j])
-                        else:
-                            q.put(list[j])
-        new_node = ""
-        while(q.qsize()>0):
-            new_node = q.get()
-            list = new_node.next_link.get(item)
-            if(list != None):
-                for i in range(0,len(list)):
-                    if((list[i].parent_item_bitset & last_event_item_bitset) == last_event_item_bitset):
-                        next_level_nodes.append(list[i])
-                    else:
-                        q.put(list[i])
-        return next_level_nodes
-
 
     def GettingUnmodifiedNodes(self, bpfsptree_node, pass_no):
         unmodified_node_list = []
