@@ -265,7 +265,6 @@ class INC_SP_Tree_Functionalities:
                             # a solution node which is modified: can not be taken
                             continue
                         elif(list[j].present_count > 1):
-                            over_support = over_support + list[j].present_count
                             actual_support = actual_support + list[j].present_count
                             failed_nodes.append(list[j])
 
@@ -691,26 +690,14 @@ class INC_SP_Tree_Functionalities:
                             bpfsptree_node.freq_seq_ex_child_nodes[symbol].item = symbol
                             bpfsptree_node.freq_seq_ex_child_nodes[symbol].support = actual_support
 
-                            # getting the previous unmodified nodes from the parent node's unmodifed nodes
-                            if(unmodified_node_list_calculated == False):
-                                # if unmodified_node_list not calculate first calculate it
-                                unmodified_node_list = self.GettingUnmodifiedNodes(bpfsptree_node, pass_no)
-                                unmodified_node_list_calculated = True
-                            over_support1, unmodified_nodes_for_extension = self.SequenceExtensionForUnmodifiedPart(unmodified_node_list, symbol)
+                            # getting the rest of the nodes
+                            over_support1, actual_support1, next_level_nodes, checked_all = self.SequenceExtensionNormalExceptModifiedNodes( bpfsptree_node.projection_nodes, symbol, minimum_support_threshold - actual_support, pass_no, bpfsptree_node.support)
 
-                            # saving the projection unmodified nodes in BPFSP Tree
-                            for j in range(0, len(unmodified_nodes_for_extension)):
-                                bpfsptree_node.freq_seq_ex_child_nodes[symbol].projection_nodes.append(unmodified_nodes_for_extension[j])
-
-                            # getting the unmodified nodes from parent node's modified section
-                            over_support2, unmodified_nodes_for_extension = self.SequenceExtensionFromModifiedToUnmodified(modified_node_list, symbol, pass_no)
-
-                            # saving the projection unmodified nodes from modified nodes in BPFSP Tree
-                            for j in range(0,len(unmodified_nodes_for_extension)):
-                                bpfsptree_node.freq_seq_ex_child_nodes[symbol].projection_nodes.append(unmodified_nodes_for_extension[j])
-
-                            # saving the projection new nodes in in BPFSP Tree
-                            for j in range(0, len(modified_nodes)):
+                            # saving the nodes from unmodified database
+                            for j in range(0,len(next_level_nodes)):
+                                bpfsptree_node.freq_seq_ex_child_nodes[symbol].projection_nodes.append(next_level_nodes[j])
+                            # saving the nodes from modified database
+                            for j in range(0,len(modified_nodes)):
                                 bpfsptree_node.freq_seq_ex_child_nodes[symbol].projection_nodes.append(modified_nodes[j])
 
                             # saving the modified nodes for future extension
@@ -718,12 +705,11 @@ class INC_SP_Tree_Functionalities:
                             new_s_list = new_s_list | (1<<symbol)
 
                             # as we have complete over support
-                            # over support from (modified to modified),(unmodified to unmodified),(modified to unmodified)
-                            over_support = complete_over_support + over_support1 + over_support2
+                            # over support from (modified to modified),(unmodified to unmodified)
+                            over_support = complete_over_support + over_support1
                             if(over_support < minimum_support_threshold):
                                 # heuristic i list pruning applied
                                 heuristic_s_list_wise_i_list_pruning[symbol] = True
-
                             # completed all the works
 
                         else:
@@ -902,26 +888,14 @@ class INC_SP_Tree_Functionalities:
                                 bpfsptree_node.freq_item_ex_child_nodes[symbol].support = actual_support
                                 bpfsptree_node.freq_item_ex_child_nodes[symbol].connection_type_with_parent = False # Itemset extension
 
-                                # getting the previous unmodified nodes from the parent node's unmodifed nodes
-                                if(unmodified_node_list_calculated == False):
-                                    # if unmodified_node_list not calculate first calculate it
-                                    unmodified_node_list = self.GettingUnmodifiedNodes(bpfsptree_node, pass_no)
-                                    unmodified_node_list_calculated = True
+                                # getting the nodes from unmodified database
+                                actual_support, next_level_nodes, checked_all = self.ItemsetExtensionNormalWithoutModified( bpfsptree_node.projection_nodes, symbol, minimum_support_threshold-actual_support, pass_no, last_event_item_bitset, bpfsptree_node.support)
 
-                                unmodified_nodes = self.ItemsetExtensionForUnmodifiedPart(unmodified_node_list, symbol, last_event_item_bitset)
+                                # saving the unmodifed nodes
+                                for j in range(0,len(next_level_nodes)):
+                                    bpfsptree_node.freq_item_ex_child_nodes[symbol].projection_nodes.append(next_level_nodes[j])
 
-
-                                # saving the previous unmodified nodes
-                                for j in range(0,len(unmodified_nodes)):
-                                    bpfsptree_node.freq_item_ex_child_nodes[symbol].projection_nodes.append(unmodified_nodes[j])
-
-                                # getting the unmodified nodes from the modified nodes
-                                unmodified_nodes = self.ItemsetExtensionFromModifiedToUnmodified(modified_node_list, symbol, last_event_item_bitset, pass_no)
-
-                                for j in range(0,len(unmodified_nodes)):
-                                    bpfsptree_node.freq_item_ex_child_nodes[symbol].projection_nodes.append(unmodified_nodes[j])
-
-                                # saving the new nodes
+                                # saving the modified nodes
                                 for j in range(0, len(modified_nodes)):
                                     bpfsptree_node.freq_item_ex_child_nodes[symbol].projection_nodes.append(modified_nodes[j])
 
