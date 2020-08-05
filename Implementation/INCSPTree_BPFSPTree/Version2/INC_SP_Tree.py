@@ -23,7 +23,6 @@ class INC_SP_Tree_Node:
         self.present_count = 0
         self.next_link={}
         self.parent_item_bitset=0
-        self.modified_next_link_in_current_pass={}
 
         # DEBUG:
         self.node_id = 0
@@ -90,9 +89,11 @@ class INC_SP_Tree_Functionalities:
         if(node.modified_at<pass_no):
             node.modified_at=pass_no
             node.previous_count=node.present_count
+            node.modified_next_link_in_current_pass.clear()
             if(node.item != ""):
                 # not taking root
                 modified_nodes[node.item] = node
+
         else:
             # this modified node is already tracked
             if(node.item != "" and modified_nodes.get(node.item) != None):
