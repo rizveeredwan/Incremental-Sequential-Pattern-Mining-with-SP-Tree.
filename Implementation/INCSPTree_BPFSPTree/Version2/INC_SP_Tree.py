@@ -23,6 +23,7 @@ class INC_SP_Tree_Node:
         self.present_count = 0
         self.next_link={}
         self.parent_item_bitset=0
+        self.modified_next_link_in_current_pass={}
 
         # DEBUG:
         self.node_id = 0
