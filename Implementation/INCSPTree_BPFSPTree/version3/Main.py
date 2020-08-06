@@ -188,9 +188,9 @@ class Main:
         # updating the minimum support threshold
         self.minimum_support_threshold_previous = minimum_support_threshold
         # Printing the bi directional projection pointer based frequent sequential pattern tree
-        print("Printing Tree")
+        #print("Printing Tree")
         #self.inc_sp_tree_functionalities.PrintINCSPTree(self.inc_sp_tree_root)
-        #self.PrintBPFSPTree(self.bpfsptree_root,[])
+        self.PrintBPFSPTree(self.bpfsptree_root,[])
 
     def MemoryUsage(self):
         process = psutil.Process(os.getpid())
@@ -253,14 +253,14 @@ input_file_name = ''
 for i in range(1,main.iteration_count_input+1):
     input_file_name = directory+'\in'+str(i)+'.txt'
     sys.stdin = open(input_file_name,'r')
-    #sys.stdout = open(directory+'\out'+str(i)+'.txt','w')
+    sys.stdout = open(directory+'\out'+str(i)+'.txt','w')
     # INC SP Tree build complete
     main.DatabaseInput()
     # Now need to mine
     main.InitiateCompleteMining()
     # printing process time
 
-main.CPUTime()
+#main.CPUTime()
 #main.MemoryUsage()
 
 

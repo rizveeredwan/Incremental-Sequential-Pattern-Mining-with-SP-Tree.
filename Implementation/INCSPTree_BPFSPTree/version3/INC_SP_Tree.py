@@ -24,6 +24,8 @@ class INC_SP_Tree_Node:
         self.next_link={}
         self.parent_item_bitset=0
 
+        self.modified_next_link_in_current_pass={}
+
         # DEBUG:
         self.node_id = 0
 
@@ -89,12 +91,20 @@ class INC_SP_Tree_Functionalities:
         if(node.modified_at<pass_no):
             node.modified_at=pass_no
             node.previous_count=node.present_count
+            node.modified_next_link_in_current_pass.clear()
+            for key in modified_nodes:
+                node.modified_next_link_in_current_pass[key]=[]
+                node.modified_next_link_in_current_pass[key].append(modified_nodes[key])
             if(node.item != ""):
                 # not taking root
                 modified_nodes[node.item] = node
 
         else:
             # this modified node is already tracked
+            for key in modified_nodes:
+                if(node.modified_next_link_in_current_pass.get(key) == None):
+                    node.modified_next_link_in_current_pass[key]=[]
+                node.modified_next_link_in_current_pass[key].append(modified_nodes[key])
             if(node.item != "" and modified_nodes.get(node.item) != None):
                 del modified_nodes[node.item]
 
@@ -199,7 +209,7 @@ class INC_SP_Tree_Functionalities:
         new_created_nodes=[]
         complete_over_support = 0
         for i in range(0,len(node_list)):
-            list = node_list[i].next_link.get(item)
+            list = node_list[i].modified_next_link_in_current_pass.get(item)
             if(list != None):
                 for j in range(0,len(list)):
                     new_node = list[j]
@@ -225,7 +235,7 @@ class INC_SP_Tree_Functionalities:
 
 
         for i in range(0,len(failed_nodes)):
-            list = failed_nodes[i].next_link.get(item)
+            list = failed_nodes[i].modified_next_link_in_current_pass.get(item)
             actual_support = actual_support - failed_nodes[i].present_count
             if(list != None):
                 for j in range(0,len(list)):
@@ -266,6 +276,10 @@ class INC_SP_Tree_Functionalities:
                             # a solution node which is modified: can not be taken
                             continue
                         elif(list[j].present_count > 1):
+                            if(list[j].modified_next_link_in_current_pass.get(item) != None):
+                                if(list[j].present_count == len(list[j].modified_next_link_in_current_pass[item])):
+                                    # all items are in modified branches
+                                    continue
                             actual_support = actual_support + list[j].present_count
                             failed_nodes.append(list[j])
 
@@ -342,7 +356,7 @@ class INC_SP_Tree_Functionalities:
         total_node_support = 0
         q=Queue()
         for i in range(0,len(node_list)):
-            list = node_list[i].next_link.get(item)
+            list = node_list[i].modified_next_link_in_current_pass.get(item)
             if(list != None):
                 for j in range(0,len(list)):
                     if(list[j].modified_at == pass_no):
@@ -363,7 +377,7 @@ class INC_SP_Tree_Functionalities:
         while(q.qsize()>0):
             new_node = q.get()
             actual_support = actual_support - new_node.present_count
-            list = new_node.next_link.get(item)
+            list = new_node.modified_next_link_in_current_pass.get(item)
             if(list != None):
                 for i in range(0,len(list)):
                     if(list[i].modified_at == pass_no):
@@ -402,6 +416,10 @@ class INC_SP_Tree_Functionalities:
                     elif(list[j].modified_at == pass_no):
                         if((list[j].parent_item_bitset & last_event_item_bitset) != last_event_item_bitset and list[j].present_count>1):
                             # we need to go there to see if a solution lies in unmodified node
+                            if(list[j].modified_next_link_in_current_pass.get(item) != None):
+                                if(list[j].present_count == len(list[j].modified_next_link_in_current_pass[item])):
+                                    # all items are in modified branches
+                                    continue
                             actual_support = actual_support + list[j].present_count
                             q.put(list[j])
 
