@@ -262,21 +262,3 @@ for i in range(1,main.iteration_count_input+1):
 
 #main.CPUTime()
 #main.MemoryUsage()
-
-
-
-
-
-
-
-
-
-"""
-value = 1<<65789
-bit_position = int(floor(log(value,2)))
-print(bit_position)
-"""
-
-#value  = 1<<100000
-#print(value)
-#print(value - 1)
