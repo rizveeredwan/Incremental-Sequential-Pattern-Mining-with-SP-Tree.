@@ -679,9 +679,9 @@ class INC_SP_Tree_Functionalities:
                                 heuristic_s_list_wise_i_list_pruning[symbol] = True
                         else:
                             # first will look into modified nodes
-                            over_support, actual_support, complete_over_support, new_created_nodes, modified_nodes, checked_all, total_node_support  =  self.SequenceExtensionIncremental(modified_node_list, symbol, add_count, pass_no, 0)
+                            over_support, actual_support, complete_over_support, new_created_nodes, modified_nodes, checked_all, total_node_support  =  self.SequenceExtensionIncremental(modified_node_list, symbol, add_count+1, pass_no, 0)
 
-                            if(actual_support >= add_count):
+                            if(actual_support >= (add_count+1)):
                                 # need to count support in the remaining DB
                                 over_support1, actual_support1, next_level_nodes, checked_all = self.SequenceExtensionNormalExceptModifiedNodes(bpfsptree_node.projection_nodes, symbol, minimum_support_threshold - total_node_support, pass_no, bpfsptree_node.support)
 
@@ -866,11 +866,11 @@ class INC_SP_Tree_Functionalities:
                                 # completed all the works
                             else:
                                 # other iterations
-                                actual_support, modified_nodes, new_created_nodes, checked_all, total_node_support = self.ItemsetExtensionIncremental(modified_node_list, symbol, add_count, pass_no, last_event_item_bitset, 0)
+                                actual_support, modified_nodes, new_created_nodes, checked_all, total_node_support = self.ItemsetExtensionIncremental(modified_node_list, symbol, add_count+1, pass_no, last_event_item_bitset, 0)
 
 
 
-                                if(actual_support >= add_count):
+                                if(actual_support >= (add_count+1)):
                                     # need to calculate support in the original database
                                     actual_support1, next_level_nodes, checked_all = self.ItemsetExtensionNormalWithoutModified(bpfsptree_node.projection_nodes, symbol, minimum_support_threshold - total_node_support, pass_no, last_event_item_bitset, bpfsptree_node.support)
 
