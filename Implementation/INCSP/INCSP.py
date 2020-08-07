@@ -1,4 +1,5 @@
 from math import ceil
+import sys
 
 class INCSP:
     def __init__(self,minimum_percentage):
@@ -28,7 +29,7 @@ class INCSP:
         with open(file_name,'r') as file:
             lines = file.readlines()
             count = int(lines[0].strip())
-            for i in range(0,count):
+            for i in range(1,count+1):
                 sid, processed_sequence = self.ProcessSequence(lines[i])
                 self.new_database[sid] = processed_sequence
         for key in self.new_database:
@@ -49,8 +50,7 @@ class INCSP:
         for key in self.new_database:
             for i in range(0,len(self.new_database[key])):
                 for j in range(0,len(self.new_database[key][i])):
-                    if(self.one_length_candidates.get(self.new_database[key][i][j]) == None):
-                        self.one_length_candidates[self.new_database[key][i][j]] = True
+                    self.one_length_candidates[self.new_database[key][i][j]] = True
 
     def SubPatternChecking(self, base_pattern, actual_pattern):
         prev_ending = -1
@@ -85,21 +85,21 @@ class INCSP:
                 # new sequence
                 for i in range(0,len(xk)):
                     sup = self.SubPatternChecking(self.new_database[key], xk[i][0])
-                    xk[i][1] = xk[i][1]+1
+                    xk[i][1] = xk[i][1]+sup
             else:
                 # merged with old sequence
                 for i in range(0,len(xk)):
                     sup = self.SubPatternChecking(self.new_database[key], xk[i][0])
                     if(sup == 1):
-                        if((self.SubPatternChecking(self.database[key]), xk[i][0]) == 0):
-                            xk[i][1] = xk[i][1]+1
+                        if(self.SubPatternChecking(self.database[key], xk[i][0]) == 0):
+                            xk[i][1] = xk[i][1]+sup
         return xk
 
     def SupportCountTwo(self, xk_prime):
         for key in self.database:
             for i in range(0,len(xk_prime)):
                 sup = self.SubPatternChecking(self.database[key], xk_prime[i][0])
-                xk_prime[i][1] = xk_prime[i][1] + 1
+                xk_prime[i][1] = xk_prime[i][1] + sup
         return xk_prime
 
     def NewSequenceCount(self):
@@ -192,13 +192,20 @@ class INCSP:
                 actual_candidates.append(base_pattern)
         return actual_candidates
 
+    def TwoLengthCandidateGeneration(self, list_of_patterns):
+        candidates = []
+        for i in range(0,len(list_of_patterns)):
+            for j in range(0,len(list_of_patterns)):
+                candidates.append([list_of_patterns[i][0],list_of_patterns[j][0]])
+                if(list_of_patterns[i][0][0]<list_of_patterns[j][0][0]):
+                    candidates.append([[list_of_patterns[i][0][0],list_of_patterns[j][0][0]]])
+        return candidates
+
     def IncSPMining(self):
-        additional_count = self.NewSequenceCount()
-        self.total_database_size = additional_count + len(self.database)
         xk=[]
         self.GenerateLengthOneCandidates()
         for key in self.one_length_candidates:
-            xk.append([[key],0])
+            xk.append([[[key]],0])
         k=1
         while True:
             xk = self.SupportCountOne(xk)
@@ -207,7 +214,7 @@ class INCSP:
                 if(self.frequent_patterns.get(k) != None and self.frequent_patterns[k].get(str(xk[i][0])) != None):
                     continue
                 if(xk[i][1]<(self.percentage_threshold*(self.total_database_size-len(self.database)))):
-                    xk_prime.append([xk[i][0],0)
+                    xk_prime.append([xk[i][0],0])
             xk_prime = self.SupportCountTwo(xk_prime)
             sk = {}
             ptr = -1
@@ -216,21 +223,24 @@ class INCSP:
                 if(self.frequent_patterns.get(k) != None and self.frequent_patterns[k].get(str(xk[i][0])) != None):
                     prev_freq = self.frequent_patterns[k][str(xk[i][0])]
                     new_freq = xk[i][1]
-                    if((prev_freq+new_freq) >= self.percentage_threshold * self.total_database_size):
-                        sk[str(x_k[i][0])]=prev_freq+new_freq
-                        list_of_patterns.append(xk_[i][0])
+                    if((prev_freq+new_freq) >= (self.percentage_threshold * self.total_database_size)/100.0):
+                        sk[str(xk[i][0])]=prev_freq+new_freq
+                        list_of_patterns.append(xk[i][0])
                 else:
                     ptr = ptr + 1
                     prev_freq = xk_prime[ptr][1]
                     new_freq = xk[i][1]
-                    if((prev_freq+new_freq) >= self.percentage_threshold * self.total_database_size):
-                        sk[str(x_k[i][0])]=prev_freq+new_freq
-                        list_of_patterns.append(xk_[i][0])
+                    if((prev_freq+new_freq) >= (self.percentage_threshold * self.total_database_size)/100.0):
+                        sk[str(xk[i][0])]=prev_freq+new_freq
+                        list_of_patterns.append(xk[i][0])
             self.frequent_patterns[k] = sk
             k = k + 1
             # generating candidates
-            candidates, hash_table = self.Join(list_of_patterns)
-            candidates = self.Prune(candidates, hash_table)
+            if(k == 2):
+                candidates = self.TwoLengthCandidateGeneration(list_of_patterns)
+            else:
+                candidates, hash_table = self.Join(list_of_patterns)
+                candidates = self.Prune(candidates, hash_table)
             xk.clear()
             if(len(candidates) > 0):
                 for i in range(0,len(candidates)):
@@ -244,6 +254,17 @@ class INCSP:
                         break
                 break
         self.MergeWithOldDB()
+        
+    def WriteFrequentPatterns(self):
+        k = 1
+        while True:
+            if(self.frequent_patterns.get(k) != None):
+                for key in self.frequent_patterns[k]:
+                    print(key)
+                    print(self.frequent_patterns[k][key])
+                k = k + 1
+            else:
+                break
 
 def ReadMetadata(file_name):
     with open(file_name,'r') as file:
@@ -253,7 +274,7 @@ def ReadMetadata(file_name):
         file.close()
         return percentage_threshold, iteration_count
 
-directory = 'E:\Research\Incremental-Sequential-Pattern-Mining\Incremental-Sequential-Pattern-Mining-with-SP-Tree\Implementation\Dataset\Dataset17'
+directory = 'E:\Research\Incremental-Sequential-Pattern-Mining\Incremental-Sequential-Pattern-Mining-with-SP-Tree\Implementation\Dataset\Dataset2'
 
 percentage_threshold, iteration_count = ReadMetadata(directory+'\metadata.txt')
 
@@ -261,3 +282,6 @@ inc_sp = INCSP(percentage_threshold)
 for i in range(1,iteration_count+1):
     input_file_name = directory+'\in'+str(i)+'.txt'
     inc_sp.ReadDB(input_file_name)
+    #print("Mining done")
+    sys.stdout = open('.\Output\incsp-out-'+str(i)+'.txt','w')
+    inc_sp.WriteFrequentPatterns()
