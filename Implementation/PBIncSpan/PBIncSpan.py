@@ -119,17 +119,27 @@ class PBIncSpan:
                 ies[key] = temp[key]
         return ies
 
-    def GettingTheIESP(self, node, temp):
+    def GettingTheIESP(self, node):
         iesp = {}
         for i in range(0,len(node.pseudo_projection_in_ldb)):
             event_no = node.pseudo_projection_in_ldb[i][1]
             sid = node.pseudo_projection_in_ldb[i][0]
+            if(self.previous_dump.get(sid) != None):
+                event_no = max(event_no,len(node.previous_dump[sid]))
+            for j in range(event_no,len(node.pseudo_projection_in_ldb[sid])):
+                for k in range(0,len(node.pseudo_projection_in_ldb[sid][j])):
+                    iesp[node.pseudo_projection_in_ldb[sid][j][k]] = True
+        return iesp
 
-    def DepthPruning(self, node, last_event_items,  minimum_support_threshold):
-        temp = self.ScanningTheDBToGetFrequency(self, node.pseudo_projection_in_ldb, last_event_items)
-
-
-
+    def DepthPruning(self, parent_node, node, last_event_items,  minimum_support_threshold):
+        iesp = self.GettingTheIESP(node, temp)
+        for key in parent_node.seq_child_nodes:
+            if(parent_node.seq_child_nodes[key].item in iesp):
+                return False
+        for key in parent_node.it_child_nodes:
+            if(parent_node.it_child_nodes[key].item in iesp):
+                return False
+        return True
         # need to work from here
 
     def Mining(self):
