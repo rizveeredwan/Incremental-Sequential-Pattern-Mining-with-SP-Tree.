@@ -4,12 +4,14 @@ class PBIncSpan:
     def __init__(self, percentage_threshold):
         self.D_prime = {}
         self.LDB = {}
+        self.previous_dump = {}
         self.percentage_threshold = self.percentage_threshold
         self.root = PrefixTree()
 
     def ReadDB(self, file_name):
         self.LDB.clear()
         self.root.pseudo_projection_in_ldb.clear()
+        self.previous_dump.clear()
         with open(file_name, 'r') as file:
             lines = file.readlines()
             for i in range(0,len(lines)):
@@ -20,6 +22,9 @@ class PBIncSpan:
                     self.root.psuedo_projection.append([sid,""])
                     self.root.pseudo_projection_in_ldb.append([sid,""])
                 else:
+                    self.previous_dump[sid] = []
+                    for j in range(0,len(self.D_prime[sid])):
+                        self.previous_dump[sid].append(self.D_prime[sid][j])
                     for j in range(0,len(processed_sequence)):
                         self.D_prime[sid].append(processed_sequence[j])
                     self.LDB[sid] = self.D_prime[sid]
@@ -114,10 +119,18 @@ class PBIncSpan:
                 ies[key] = temp[key]
         return ies
 
+    def GettingTheIESP(self, node, temp):
+        iesp = {}
+        for i in range(0,len(node.pseudo_projection_in_ldb)):
+            event_no = node.pseudo_projection_in_ldb[i][1]
+            sid = node.pseudo_projection_in_ldb[i][0]
+
     def DepthPruning(self, node, last_event_items,  minimum_support_threshold):
         temp = self.ScanningTheDBToGetFrequency(self, node.pseudo_projection_in_ldb, last_event_items)
-        ies = {}
-        # need to work from here 
+
+
+
+        # need to work from here
 
     def Mining(self):
         minimum_support_threshold = int(ceil(self.percentage_threshold * len(self.D_prime))/100.0)
