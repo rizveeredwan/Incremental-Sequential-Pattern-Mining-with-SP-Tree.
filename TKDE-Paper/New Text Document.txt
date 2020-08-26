@@ -1,0 +1,171 @@
+\begin{algorithm}
+    \scriptsize %\small, \footnotesize, \scriptsize, or \tiny
+    \caption{IncTree-Miner:Part 1}
+    \label{algorithm:inc_tree_miner}
+    \begin{algorithmic}[1]
+     \State \textbf{Input: }Pattern $P$, A list of $modified\_nodes$ to point the modified projections of $P$ in IncSP-Tree updated due to Inc DB $D^{\prime}$,$sList$,$iList$,$bpfsp\_node$, minimum support count in last pass $\delta$ and in current pass $\delta^{\prime}$,current $pass\_no$, last events' bitset representation $last\_ev\_bits$.
+        \State \textbf{Output: }Complete set of frequent sequential patterns stored in $BPFSP-Tree$ with updated support and complete projection pointers. 
+        \Procedure{IncTree-Miner}{}
+         \State $SE\_Nxt\_Itr,IE\_nxt\_Itr=\{\}$ \Comment{Next itreation nodes}
+          \State $\delta^{\prime}^{\prime}=\delta^{\prime}-\delta+1$\Comment{Infrequent to Frequent Transition Prop}
+                \If{($pass\_no==1$)}$\delta^{\prime}^{\prime}=\delta^{\prime}^{\prime}-1$ \Comment{previously nothing frequent}
+                \EndIf
+           \For{(each item $i \in$ last event of $P$)}\Comment{Co-Existing Table wise pruning}
+            \For{each item $j \in sList$}
+                \If{($CETable_{s}[i][j]<\delta^{\prime}$)}$\text{ }sList-\{j\}$
+                \EndIf
+            \EndFor
+            \For{each item $j \in iList$}
+                \If{($CETable_{i}[i][j]<\delta^{\prime}$)}$\text{ }iList-\{j\}$
+                \EndIf
+            \EndFor
+         \EndFor
+        \For{(each item $i \in sList$)}\Comment{SE Checking}
+             \If{($bpfsp\_node$ has sequence extended child for $i$)}
+                \State $child=bpfsp\_node.SEChild[i]$ \Comment{Previously Frequent}
+                 \State \Comment{Implicit Projection in Inc DB, calculating total support of $P\{i\}$}
+                \State $inc\_sup,heuristic\_sup_{m},modified,new\_created,flag,$
+                \State $total\_sup_{m}$ =SE\_Incremental($modified\_nodes,i,\delta^{\prime},pass\_no,$
+                \State \hfill$child.support$)
+                \If{($inc\_sup \geq \delta^{\prime}$)}\Comment{Still frequent}
+                    \State $child.support=inc\_sup$ \Comment{Updating support, Adding}
+                    \State $child.projections \cup new\_created$ \Comment{New Projections}
+                    \State $SE\_nxt\_itr[i] = modified$
+                        \State \Comment{Modified nodes for next iterations}
+                    
+                \Else \Comment{Became Infrequent}
+                \State Remove $child$ and all its subtrees from BPFSP-Tree and Adjust end node links of BPFSP-Tree. \Comment{Removing Non Frequent Patterns}
+                \If{($flag==True$)} \Comment{Constructing NIB for SE}
+                    \State $bpfsp\_node.SENIB[i]=inc\_sup$
+                \EndIf
+                \EndIf
+            \ElsIf{($i \in bpfsp\_node.SENIB$)}\Comment{Previous Support in NIB}
+                \State $inc\_sup,heuristic\_sup_{m},modified,new\_created,flag,$
+                \State $total\_sup_{m}$ =SE\_Incremental($modified\_nodes,i,\delta^{\prime},pass\_no,$
+                \State \hfill$bpfsp\_node.SENIB[i]$)
+                \If{($inc\_sup \geq \delta^{\prime}$)}\Comment{Became new Frequent Pattern}
+                \State Create new node for $bpfsp\_node.SEChild[i]$
+                \State Remove $i$ from $bpfsp\_node.SENIB$
+                \State $bpfsp\_node.SEChild[i].support = inc\_sup$
+                \State $heuristic\_sup_{u},total\_sup_{u},unmodified,flag=$
+                    SE\_Unmodified($bpfsp\_node.projections,i,0,pass\_no,bpfsp\_node.support$)
+                \State \Comment{Getting the unmodified nodes}
+                \State $bpfsp\_node.SEChild[i].projections \cup (unmodified \cup modified) $ \Comment{Complete set of projection nodes}
+                \State $SE\_nxt\_itr[i] = modified$ \Comment{Modified nodes for next pass}
+                \If{($heuristic\_sup_{m}+heuristic\_sup_{u} < \delta^{\prime}$)}
+                    \If{($i \in iList$)}$\text{ }iList-\{i\}$ \Comment{Heuristic Pruning}
+                    \EndIf 
+                \EndIf
+                \Else \Comment{Still not frequent}
+                    \If{($flag==True$)} 
+                    \State $bpfsp\_node.SENIB[i]=inc\_sup$\Comment{Update NIB}
+                    \Else $\text{ }$Delete $bpfsp\_node.SENIB[i]$\Comment{Not total support}
+                    \EndIf 
+                \EndIf
+            \Else \Comment{Not Previously Frequent, not in NIB}
+                \State $inc\_sup,heuristic\_sup_{m},modified,new\_created,flag,$
+                $total\_sup_{m}$ =SE\_Incremental($modified\_nodes,i,\delta^{\prime}^{\prime},pass\_no,0)$
+                \If{($inc\_sup \geq \delta^{\prime}^{\prime}$)}\Comment{Significant support in Inc DB}
+                \State $heuristic\_sup_{u},total\_sup_{u},Unmodified,flag=$
+                    SE\_Unmodified($bpfsp\_node.projections,i,\delta^{\prime}-total\_sup_{m},pass\_no,bpfsp\_node.support$) \Comment{Projecting in Old DB}
+                    \If{($total\_sup_{m}+total\_sup_{u} \geq \delta^{\prime}$)}
+                        \Comment{New Frequent}
+                        \State Create new node for $bpfsp\_node.SEChild[i]$
+                        \State $bpfsp\_node.SEChild[i].support = total\_sup_{m}+total\_sup_{u}$
+                        \State $bpfsp\_node.SEchild[i].projections\cup modified \cup unmodified$ \Comment{Complete Set of projections}
+                        \State $SE\_nxt\_itr[i] = modified$
+                     \Else \Comment{Not Frequent}
+                        \If{($flag==True$)} 
+                        \State $bpfsp.SENIB[i]=total\_sup_{m}+total\_sup_{u}$
+                        \EndIf
+                    \EndIf 
+                    \If{($(heuristic\_sup_{m}+heuristic\_sup_{u}) < \delta^{\prime}$)}
+                        \If{($i \in iList$)} $iList - \{i\}$ \Comment{Heuristic Pruning}
+                        \EndIf
+                    \EndIf
+                \EndIf
+            \EndIf
+         \EndFor
+         \State Remove All $i$ for $bpfsp\_node.SENIB$ where $i \notin sList$
+            \State \Comment{For Consistency Over Iterations}
+        \For{(each item $i \in iList$)}
+            \If{($bpfsp\_node$ has itemset extended child for $i$)}
+                \State $child=bpfsp\_node.IEChild[i]$
+                \State $inc\_sup,modified,new\_created,flag,total\_sup_{m}=$
+                \State IE\_Incremental($modified\_nodes,i,\delta^{\prime},pass\_no,last\_ev\_bits,$
+                \State $child.support$) \Comment{Implicit Projection in Inc DB for IE}
+                \If{($inc\_sup \geq \delta^{\prime}$)} \Comment{Remains Frequent}
+                    \State $child.support = inc\_sup$
+                    \State $child.projections \cup new\_created$ \Comment{Updating Projections}
+                    \State $IE\_nxt\_itr[i]=modified$\Comment{For next iterations}
+                \Else \Comment{Became Infrequent}
+                    \State Remove $child$ and all its subtrees from BPFSP-Tree and Adjust end node links of BPFSP-Tree. \Comment{Removing Non Frequent Patterns}
+                    \If{($flag==True$)} \Comment{Constructing NIB}
+                        \State $bpfsp\_node.IENIB[i]=inc\_sup$
+                    \EndIf
+                \EndIf
+              \ElsIf{($i \in bpfsp\_node.IENIB$)} \Comment{Previous support in NIB}
+                     \State $inc\_sup,modified,new\_created,flag,total\_sup_{m}=$
+                    \State IE\_Incremental($modified\_nodes,i,\delta^{\prime},pass\_no,last\_ev\_bits,$
+                    \State $bpfsp\_node.IENIB[i]$) \Comment{Implicit Projection in Inc DB for IE}
+                    \If{($inc\_sup \geq \delta^{\prime}$)}\Comment{Became Frequent}
+                     \State Create new node for $bpfsp\_node.IEChild[i]$
+                     \State Remove $i$ from $bpfsp\_node.IENIB$
+                     \State $bpfsp\_node.IEChild[i].support = inc\_sup$
+                      \State $total\_sup_{u},unmodified,flag=$IE\_Unmodified(
+                 \State$bpfsp\_node.projections,i,0,pass\_no,last\_ev\_bits,$\State $bpfsp\_node.support$)\Comment{Getting unmodified nodes for IE}
+                    \State $bpfsp\_node.IEChild[i].projections \cup modified \cup unmodified$ \Comment{Complete set of projection nodes}
+                    \State $IE\_nxt\_itr[i]=modified$
+                \Else \Comment{Still Infrequent}
+                \If{($flag==True$)} 
+                    \State $bpfsp\_nodes.IENIB[i]=inc\_sup$\Comment{Updating NIB}
+                \Else \text{ Remove }$i$ from $bpfsp\_nodes.IENIB$
+                \EndIf
+                \EndIf
+        \Else \Comment{Previously Not Frequent, Not in NIB}
+             \State $inc\_sup,modified,new\_created,flag,total\_sup_{m}=$
+                \State IE\_Incremental($modified\_nodes,i,\delta^{\prime}^{\prime},pass\_no,last\_ev\_bits,0)$
+                \If{($inc\_sup \geq \delta^{\prime}^{\prime}$)}\Comment{Significant support in Inc DB}
+                 \State $total\_sup_{u},unmodified,flag=$IE\_Unmodified(
+                    \State$bpfsp\_node.projections,i,\delta^{\prime}-total\_sup_{m},pass\_no,last\_ev\_bits,bpfsp\_node.support$)
+                    \If{($total\_sup_{u}+total\_sup_{m} \geq \delta^{\prime}$)}\Comment{New Frequent}
+                    \State Create new node for $bpfsp\_node.IEChild[i]$
+                    \State $bpfsp\_node.IEChild[i].support = total\_sup_{m}+total\_sup_{u}$
+                    \State $bpfsp\_node.IEChild[i].projections \cup modified \cup unmodifed$ \Comment{Complete set of projection nodes for IE}
+                    \State $IE\_nxt\_itr[i]=modified$
+                    \Else 
+                    \If{($flag==True$)} \Comment{Saving for NIB}
+                    \State $bpfsp\_node.IENIB[i]=total\_sup_{u}+total\_sup_{m}$
+                    \EndIf
+                    \EndIf
+                \EndIf
+        \EndIf
+        \EndFor
+        \State Remove $i$ from $bpfsp\_node.IENIB$ where $i \notin iList$
+        \If{($bpfsp\_node$ will have no pattern extension)}
+            \State Create $end\_link$ for $bpfsp\_node$\Comment{Recursive Call end node(leaf)}
+        \Else 
+            \If{($bpfsp\_node$ has $end\_link$)} Remove $end\_link$ from it.
+            \EndIf 
+             \Comment{Recursive Extension}
+             \State $sList^{\prime}=\{i| i \in SE\_nxt\_itr\}$ \Comment{Items for which SE possible}
+             \State $iList^{\prime}=sList^{\prime}$  \Comment{Initial $iList$}
+            \For{(each item $i \in sList^{\prime}$)}
+                \State $iList^{\prime}-\{i\},index=Order(i)$\Comment{Getting index of the item}
+                \State IncTree-Miner($P\{i\},SE\_nxt\_itr[i],sList^{\prime},iList^{\prime},$
+                \State $bpfsp\_node.SEChild[i],\delta,\delta^{\prime},pass\_no,1<<index$)
+            \EndFor
+            $iList^{\prime}^{\prime}=\{i | i \in IE\_nxt\_itr\}$\Comment{Items for which IE possible}
+            \For{(each item $i \in iList^{\prime}$)}
+             \State $iList^{\prime}^{\prime}-\{i\},index=Order(i)$\Comment{Getting index of the item}
+             \State IncTree-Miner($Pi,IE\_nxt\_itr[i],sList^{\prime},iList^{\prime}^{\prime},$
+                \State $bpfsp\_node.IEChild[i],\delta,\delta^{\prime},pass\_no,last\_ev\_bits\textbf{ AND }1<<index$) \Comment{Setting bit in the last event and recursive calling}
+            \EndFor
+        \EndIf
+    \EndProcedure
+    \Procedure{RemoveInfrequentPatterns}{}
+        \State Traverse through the $end\_link$s for each node $n$ which are in the leaf of BPFSP-Tree(Recursive call ending nodes)
+        \State If $n$'s support fails to satisfy the support threshold, remove $n$ and recursively remove its ancestors until it satisfies support threshold and adjust $end\_link$s while removing nodes for consistency.  
+    \EndProcedure
+    \end{algorithmic}
+\end{algorithm}
