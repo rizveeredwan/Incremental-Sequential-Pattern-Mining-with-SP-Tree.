@@ -109,7 +109,6 @@ def IncrementalDatabaseMaker(directory_name,file_name, initial_threshold,increme
         initial_database={}
         all_complete_count = 0
         while (i<n):
-            print(i,n)
             index2 = random.randint(0,len(sid)-1)
             index = sid[index2]
             if(visit.get(index) == None):
@@ -135,12 +134,12 @@ def IncrementalDatabaseMaker(directory_name,file_name, initial_threshold,increme
             database = {}
             fail_count = 0
             while n>0:
-                print(base_n,"n = ",n,len(sequence_database),all_complete_count,len(sid))
+                #print(base_n,"n = ",n,len(sequence_database),all_complete_count,len(sid))
                 if(all_complete_count >= len(sequence_database)):
                     break
                 index2 = random.randint(0,len(sid)-1)
                 index = sid[index2]
-                print(index,visit.get(index),len(visit))
+                #print(index,visit.get(index),len(visit))
                 if(visit.get(index) == None):
                     fail_count = 0
                     visit[index] = True
@@ -165,9 +164,11 @@ def IncrementalDatabaseMaker(directory_name,file_name, initial_threshold,increme
         f.write(str(file_ptr)+'\n')
         f.close()
 
-#EventMerger('Bible/Bible.txt','Bible/Bible_Processed.txt')
-directory_name = 'Bible'
-file_name = 'Bible_Processed.txt'
+EventMerger('Kosarak25k/Kosarak25k.txt','Kosarak25k/Kosarak25k_Processed.txt')
+
+
+directory_name = 'Kosarak25k'
+file_name = 'Kosarak25k_Processed.txt'
 initial_threshold_list = [30,31,32,33,34,35,36,37,38,39,40]
 initial_threshold = initial_threshold_list[random.randint(0,len(initial_threshold_list)-1)]
 incremental_threshold=[0.05,0.1,0.15,0.2]
