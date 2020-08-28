@@ -123,53 +123,158 @@ def IncrementalDatabaseMaker(directory_name,file_name, initial_threshold,increme
                     initial_database[index+1].append(sequence_database[index][j])
                 i = i + 1
         file_ptr = 1
+        print(len(initial_database),len(sequence_database))
         WriteIntoIncrementalFile(directory_name+'/in'+str(file_ptr)+'.txt',initial_database)
         print("file = ",file_ptr)
-        while (all_complete_count<len(sequence_database)):
-            file_ptr = file_ptr + 1
-            inc_thres = incremental_threshold[random.randint(0,len(incremental_threshold)-1)]
-            n = floor(inc_thres * len(sequence_database))
-            base_n = n
-            visit={}
-            database = {}
-            fail_count = 0
-            while n>0:
-                #print(base_n,"n = ",n,len(sequence_database),all_complete_count,len(sid))
-                if(all_complete_count >= len(sequence_database)):
-                    break
-                index2 = random.randint(0,len(sid)-1)
-                index = sid[index2]
-                #print(index,visit.get(index),len(visit))
-                if(visit.get(index) == None):
-                    fail_count = 0
-                    visit[index] = True
-                    position = random.randint(taken_upto[index]+1,len(sequence_database[index])-1)
-                    if(position == len(sequence_database[index])-1):
-                        all_complete_count = all_complete_count + 1
-                        del sid[index2]
-                    database[index+1]=[]
-                    for j in range(taken_upto[index]+1,position+1):
-                        database[index+1].append(sequence_database[index][j])
-                    taken_upto[index] = position
-                    n = n-1
-                else:
-                    fail_count = fail_count +1
-                    if(fail_count >= 500):
-                        break
-
-            WriteIntoIncrementalFile(directory_name+'/in'+str(file_ptr)+'.txt',database)
-            print("file = ",file_ptr)
+        file_ptr = file_ptr + 1
+        database = {}
+        while len(visit)<len(sequence_database):
+            index = random.randint(0,len(sequence_database)-1)
+            if(visit.get(index) == None):
+                visit[index] = True
+                database[index+1] = []
+                for j in range(0,len(sequence_database[index])):
+                    database[index+1].append(sequence_database[index][j])
+                taken_upto[index] = len(sequence_database[index])-1
+            elif(taken_upto[index]<len(sequence_database[index])-1):
+                database[index+1]=[]
+                for j in range(taken_upto[index]+1,len(sequence_database[index])):
+                    database[index+1].append(sequence_database[index][j])
+                taken_upto[index] = len(sequence_database[index])-1
+        WriteIntoIncrementalFile(directory_name+'/in'+str(file_ptr)+'.txt',database)
         f=open(directory_name+'/metadata.txt','w')
         f.write('1\n')
         f.write(str(file_ptr)+'\n')
         f.close()
 
-EventMerger('Kosarak25k/Kosarak25k.txt','Kosarak25k/Kosarak25k_Processed.txt')
+def AvgNumberOfItemsetsRemoved(base_file,input_file):
+    item_count = {}
+    item_count_new = {}
+    with open(base_file,'r') as file:
+        lines = file.readlines()
+        for i in range(0,len(lines)):
+            line = lines[i].strip().split(' ')
+            StringToIntConverter(line)
+            sequence = GettingTheEvents(line)
+            item_count[i+1]=len(sequence)
+    with open(input_file,'r') as file:
+        lines = file.readlines()
+        for i in range(0,len(lines)):
+            line = lines[i].strip().split(' ')
+            index = int(line[0])
+            line = line[1:len(line)]
+            StringToIntConverter(line)
+            sequence = GettingTheEvents(line)
+            item_count_new[index-1] = len(sequence)
 
+    sum = 0
+    for key in item_count:
+        value = item_count[key]
+        if(item_count_new.get(key) != None):
+            sum = sum + item_count[key] - item_count_new[key]
+    sum = (sum*1.0)/(len(item_count))
+    print("Average Itemset Removed = ",sum)
 
-directory_name = 'Kosarak25k'
-file_name = 'Kosarak25k_Processed.txt'
-initial_threshold_list = [30,31,32,33,34,35,36,37,38,39,40]
+def SyntheticBasicDatasetMaker(input_file_name,output_file_name):
+    items = []
+    itemset_database = []
+    with open(input_file_name,'r') as file:
+        lines = file.readlines()
+        for i in range(0,len(lines)):
+            line = lines[i].strip().split(' ')
+            StringToIntConverter(line)
+            line = sorted(line)
+            itemset_database.append(line)
+            for j in range(0,len(line)):
+                items.append(line[j])
+        file.close()
+
+    items = sorted(items)
+    order = {}
+    count = 0
+    order[items[0]]=0
+    for i in range(1,len(items)):
+        if(items[i]>items[i-1]):
+            count = count + 1
+            order[items[i]] = count
+    with open(output_file_name,'w') as file:
+        for i in range(0,len(itemset_database)):
+            string = str(itemset_database[i][0])
+            v = random.randint(0,1)
+            last_event = []
+            last_event.append(itemset_database[i][0])
+            f = False
+            for j in range(0,len(itemset_database[i])):
+                v = random.randint(0,1)
+                if(v == 0):
+                    if(itemset_database[i][j] not in last_event):
+                        string = string + " "+str(itemset_database[i][j])
+                        last_event.append(itemset_database[i][j])
+                    else:
+                        string = string + " " + '-1'
+                        string = string + " "+ str(itemset_database[i][j])
+                        last_event = [itemset_database[i][j]]
+                elif(v == 1):
+                    string = string + " "+"-1"
+                    string = string + " "+ str(itemset_database[i][j])
+                    last_event = [itemset_database[i][j]]
+            string = string + " -1"
+            file.write(string+'\n')
+        file.close()
+
+def AverageSequenceLength(file_name):
+    sum = 0
+    with open(file_name,'r') as file:
+        lines = file.readlines()
+        for i in range(0,len(lines)):
+            line = lines[i].strip().split(' ')
+            StringToIntConverter(line)
+            sequence = GettingTheEvents(line)
+            for j in range(0,len(sequence)):
+                sum = sum + len(sequence[j])
+        sum = (sum)/(len(lines)*1.0)
+        print("Avg Seq. Length = ",sum)
+
+def UniqueItemCount(file_name):
+    flag = {}
+    with open(file_name,'r') as file:
+        lines = file.readlines()
+        for i in range(0,len(lines)):
+            line = lines[i].strip().split(' ')
+            StringToIntConverter(line)
+            sequence = GettingTheEvents(line)
+            for j in range(0,len(sequence)):
+                for k in range(0,len(sequence[j])):
+                    flag[sequence[j][k]] = True
+        print("Unique Item Count = ",len(flag))
+
+def AverageItemsetLength(file_name):
+    count_item = 0
+    count_event = 0
+    with open(file_name,'r') as file:
+        lines = file.readlines()
+        for i in range(0,len(lines)):
+            line = lines[i].strip().split(' ')
+            StringToIntConverter(line)
+            sequence = GettingTheEvents(line)
+            count_event = count_event + len(sequence)
+            for j in range(0,len(sequence)):
+                count_item = count_item + len(sequence[j])
+        print(count_item/(count_event*1.0))
+
+#EventMerger('c20d10k/c20d10k.txt','c20d10k/c20d10k_Processed.txt')
+#SyntheticBasicDatasetMaker('c20d10k/c20d10k.txt','c20d10k/c20d10k_Processed.txt')
+
+"""
+directory_name = 'c20d10k'
+file_name = 'c20d10k_Processed.txt'
+initial_threshold_list = [90]
 initial_threshold = initial_threshold_list[random.randint(0,len(initial_threshold_list)-1)]
-incremental_threshold=[0.05,0.1,0.15,0.2]
+incremental_threshold=[0.1]
 IncrementalDatabaseMaker(directory_name,directory_name+'/'+file_name, initial_threshold/100.0,incremental_threshold)
+"""
+
+AvgNumberOfItemsetsRemoved('c20d10k/c20d10k_Processed.txt','c20d10k/in1.txt')
+#AverageSequenceLength('Kosarak25k/Kosarak25k_Processed.txt')
+#UniqueItemCount('t25i10d10k/t25i10d10k_Processed.txt')
+#AverageItemsetLength('Bible/Bible_Processed.txt')
