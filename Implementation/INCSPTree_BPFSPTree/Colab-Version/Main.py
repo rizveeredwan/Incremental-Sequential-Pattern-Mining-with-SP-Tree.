@@ -208,11 +208,13 @@ class Main:
         process = psutil.Process(os.getpid())
         current_memory = (process.memory_info().rss/(1024.0*1024.0)) # in bytes
         print("Current memory = ",current_memory, " MB")
+        return current_memory
 
     def CPUTime(self):
         current_time = process_time()
         print("elapsed time = ",current_time - self.start_time)
         self.start_time = current_time
+        return current_time - self.start_time
 
     def ReadPercentageThresholdAndIterationCount(self, file_name):
         with open(file_name, 'r') as file:

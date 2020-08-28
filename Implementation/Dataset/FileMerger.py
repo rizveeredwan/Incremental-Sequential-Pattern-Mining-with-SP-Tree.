@@ -58,7 +58,7 @@ class FileMerger:
 obj = FileMerger()
 counter = 2
 for i in range(1,counter+1):
-    file_name = './Dataset17/in'+str(i)+'.txt'
+    file_name = './t25i10d10k/in'+str(i)+'.txt'
     obj.ReadFile(file_name)
 
-obj.WriteFile('./Dataset17/mergedUpto'+str(counter)+'.txt')
+obj.WriteFile('./t25i10d10k/mergedUpto'+str(counter)+'.txt')
