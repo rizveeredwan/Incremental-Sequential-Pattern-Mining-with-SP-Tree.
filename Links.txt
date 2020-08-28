@@ -1,0 +1,2 @@
+https://www.youtube.com/watch?v=6-xs36h8J1U
+https://www.openshift.com/blog/private-git-repositories-part-3-personal-access-tokens
