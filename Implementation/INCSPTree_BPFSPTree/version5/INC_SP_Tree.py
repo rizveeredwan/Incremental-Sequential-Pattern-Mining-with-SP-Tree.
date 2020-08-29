@@ -593,7 +593,45 @@ class INC_SP_Tree_Functionalities:
                     return False
         return True
 
+    def DuplicateNodeChecking(self,bpfsptree_node):
+        for i in range(0,len(bpfsptree_node.projection_nodes)):
+            for j in range(i+1,len(bpfsptree_node.projection_nodes)):
+                if(bpfsptree_node.projection_nodes[i] == bpfsptree_node.projection_nodes[j]):
+                    return True # duplicate
+        return False # no duplicate nodes
+
+    def SearchingInUnderlineSubtree(self,node,searching_node):
+        if(node == searching_node):
+            print("SAME NODE")
+            return True
+        for item in node.child_link:
+            for event in node.child_link[item]:
+                value = self.SearchingInUnderlineSubtree(node.child_link[item][event],searching_node)
+                if(value == True):
+                    print("LIES IN SUBTREE")
+                    return True
+        return False
+
     def IncrementalTreeMiner(self, modified_node_list, pattern, last_event_item_bitset, s_list, i_list, bpfsptree_node, cetables, cetablei, minimum_support_threshold, pass_no, add_count):
+        """
+        if(pattern == [[232],[7],[9]]):
+            print("YES")
+            sup = bpfsptree_node.support
+            sup2 = self.ReturnNodeCalculatedSupport(bpfsptree_node)
+            print(sup,sup2,len(bpfsptree_node.projection_nodes),len(modified_node_list))
+            dup = self.DuplicateNodeChecking(bpfsptree_node)
+            print("duplicate = ",dup)
+            for i in range(0,len(bpfsptree_node.projection_nodes)):
+                for j in range(0,len(bpfsptree_node.projection_nodes)):
+                    if(i==j):
+                        continue
+                    verdict = self.SearchingInUnderlineSubtree(bpfsptree_node.projection_nodes[i],bpfsptree_node.projection_nodes[j])
+                    if(verdict == True):
+                        break
+            if(verdict == True):
+                print("LIES IN SUBTREE")
+        """
+
         actual_support, over_support,over_support1, complete_over_support, actual_support1, total_node_support = 0,0,0,0,0,0
         sequence_extended_modified_sp_tree_nodes={}
         itemset_extended_modified_sp_tree_nodes={}
@@ -705,6 +743,8 @@ class INC_SP_Tree_Functionalities:
                         # completely new item: not even in the TLB
                         if(pass_no == 1):
                             over_support, actual_support, next_level_nodes, modified_nodes, checked_all = self.SequenceExtensionNormal(bpfsptree_node.projection_nodes, symbol, minimum_support_threshold, pass_no, bpfsptree_node.support)
+                            if(pattern == [[232],[7]] and symbol == 9):
+                                print("Came here = ", pattern, over_support, actual_support)
 
                             if(actual_support >= minimum_support_threshold):
 

@@ -4,6 +4,8 @@ import os
 import psutil
 from time import process_time
 
+pattern_count = 0
+
 class PrefixTree:
     def __init__(self):
         self.item = ""
@@ -211,6 +213,7 @@ class PBIncSpan:
                 self.RecursiveMining(p, node, node.it_child_nodes[int(symbol[1])], minimum_support_threshold, new_Flag)
 
     def Mining(self, output_file_name):
+        global pattern_count
         minimum_support_threshold = int(ceil(self.percentage_threshold * len(self.D_prime)/100.0))
         items = self.ScanningTheDBToGetFrequency(self.root.pseudo_projection, [])
         fis = self.ReturnFrequentItemset(items, minimum_support_threshold)
@@ -228,8 +231,10 @@ class PBIncSpan:
             self.RecursiveMining([[int(item)]], self.root, self.root.seq_child_nodes[int(item)], minimum_support_threshold, Flag)
         self.PruneRedundantPatterns(self.root, minimum_support_threshold)
         f = open(output_file_name,'w')
+        pattern_count = 0
         self.WritePatterns([],self.root, minimum_support_threshold,f)
         print("file writing done")
+        print("pattern count = ",pattern_count)
         f.close()
 
     def PruneRedundantPatterns(self, node, minimum_support_threshold):
@@ -256,6 +261,7 @@ class PBIncSpan:
             del node
         return
     def WritePatterns(self, pattern, node, minimum_support_threshold,f):
+        global pattern_count
         p = pattern.copy()
         save = []
         for item in node.seq_child_nodes:
@@ -266,6 +272,7 @@ class PBIncSpan:
                 p.append([item])
                 f.write(str(p)+'\n')
                 f.write(str(node.seq_child_nodes[item].frequency)+'\n')
+                pattern_count = pattern_count + 1
                 self.WritePatterns(p,node.seq_child_nodes[item], minimum_support_threshold,f)
                 p.pop()
 
@@ -280,6 +287,7 @@ class PBIncSpan:
                 p[len(p)-1].append(item)
                 f.write(str(p)+'\n')
                 f.write(str(node.it_child_nodes[item].frequency)+'\n')
+                pattern_count = pattern_count + 1
                 self.WritePatterns(p,node.it_child_nodes[item], minimum_support_threshold,f)
                 p[len(p)-1].pop()
         for item in save:

@@ -46,9 +46,15 @@ def EventMerger(old_file_name, new_file_name):
                 if(v==1):
                     # merging events
                     if((k+1)<len(sequence)):
+                        ct = 0
                         for j in range(0,len(sequence[k+1])):
-                            sequence[k].append(sequence[k+1][j])
-                        del sequence[k+1]
+                            if(sequence[k+1][j] not in sequence[k]):
+                                ct = ct + 1
+                                sequence[k].append(sequence[k+1][j])
+                        if(ct == len(sequence[k+1])):
+                            del sequence[k+1]
+                        else:
+                            k = k + 1
                     else:
                         break
                 else:
@@ -262,19 +268,19 @@ def AverageItemsetLength(file_name):
                 count_item = count_item + len(sequence[j])
         print(count_item/(count_event*1.0))
 
-#EventMerger('c20d10k/c20d10k.txt','c20d10k/c20d10k_Processed.txt')
+#EventMerger('Bible/Bible.txt','Bible/Bible_Processed.txt')
 #SyntheticBasicDatasetMaker('c20d10k/c20d10k.txt','c20d10k/c20d10k_Processed.txt')
 
-"""
-directory_name = 'c20d10k'
-file_name = 'c20d10k_Processed.txt'
+
+directory_name = 'Bible'
+file_name = 'Bible_Processed.txt'
 initial_threshold_list = [90]
 initial_threshold = initial_threshold_list[random.randint(0,len(initial_threshold_list)-1)]
 incremental_threshold=[0.1]
 IncrementalDatabaseMaker(directory_name,directory_name+'/'+file_name, initial_threshold/100.0,incremental_threshold)
-"""
 
-AvgNumberOfItemsetsRemoved('c20d10k/c20d10k_Processed.txt','c20d10k/in1.txt')
+
+#AvgNumberOfItemsetsRemoved('c20d10k/c20d10k_Processed.txt','c20d10k/in1.txt')
 #AverageSequenceLength('Kosarak25k/Kosarak25k_Processed.txt')
 #UniqueItemCount('t25i10d10k/t25i10d10k_Processed.txt')
 #AverageItemsetLength('Bible/Bible_Processed.txt')

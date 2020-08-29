@@ -19,6 +19,8 @@ bpfsp_tree_module = SourceFileLoader('BPFSP_Tree', join(PROJECT_PATH, 'BPFSP_Tre
 #from Sequence_Summarizer_Structure import SequenceSummarizerStructure
 sequence_summarizer_structure_module = SourceFileLoader('Sequence_Summarizer_Structure', join(PROJECT_PATH, 'Sequence_Summarizer_Structure.py')).load_module()
 
+pattern_count = 0
+
 class Main:
     def __init__(self):
         self.new_input=0
@@ -150,6 +152,7 @@ class Main:
         return
 
     def InitiateCompleteMining(self,output_file_name):
+        global pattern_count
 
         # root node contains complete frequency
         self.bpfsptree_root.support = self.total_database_size
@@ -200,8 +203,10 @@ class Main:
         #print("Printing Tree")
         #self.inc_sp_tree_functionalities.PrintINCSPTree(self.inc_sp_tree_root)
         f = open(output_file_name,'w')
+        pattern_count = 0
         self.PrintBPFSPTree(self.bpfsptree_root,[],f)
         print("file writing done")
+        print("pattern count = ",pattern_count)
         f.close()
 
     def MemoryUsage(self):
@@ -236,9 +241,11 @@ class Main:
             for key1 in self.cetablei[key]:
                 print("(",key1,self.cetablei[key][key1],")")
     def PrintBPFSPTree(self, bpfsptree_node, pattern,f):
+        global pattern_count
         if(len(pattern)>0):
             f.write(str(pattern)+'\n')
             f.write(str(bpfsptree_node.support)+'\n')
+            pattern_count = pattern_count + 1
         for key in bpfsptree_node.freq_seq_ex_child_nodes:
             pattern.append([key])
             self.PrintBPFSPTree(bpfsptree_node.freq_seq_ex_child_nodes[key], pattern,f)
