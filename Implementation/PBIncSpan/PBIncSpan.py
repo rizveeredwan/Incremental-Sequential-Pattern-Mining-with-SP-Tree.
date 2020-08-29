@@ -153,6 +153,7 @@ class PBIncSpan:
         width_pruning = self.WidthPruning(node)
         if(width_pruning == True):
             return
+
         depth_pruning = True
         if(Flag == False):
             depth_pruning = self.DepthPruning(parent_node, node, pattern[len(pattern)-1])
@@ -179,15 +180,18 @@ class PBIncSpan:
                     new_Flag = True
                 node.it_child_nodes[int(symbol[1])].pseudo_projection = self.ScanningTheDBToGetProjection(node.pseudo_projection, int(symbol[1]), pattern[len(pattern)-1], 1)
                 node.it_child_nodes[int(symbol[1])].frequency = len(node.it_child_nodes[int(symbol[1])].pseudo_projection)
+
         for item in fis:
             symbol = item.split('_')
-            p = pattern.copy()
             if(len(symbol) == 1):
-                p.append([int(symbol[0])])
-                self.RecursiveMining(p, node, node.seq_child_nodes[int(symbol[0])], minimum_support_threshold, new_Flag)
+                pattern.append([int(symbol[0])])
+                self.RecursiveMining(pattern, node, node.seq_child_nodes[int(symbol[0])], minimum_support_threshold, new_Flag)
+                del pattern[len(pattern)-1]
             elif(len(symbol) == 2):
-                p[len(p)-1].append(int(symbol[1]))
-                self.RecursiveMining(p, node, node.it_child_nodes[int(symbol[1])], minimum_support_threshold, new_Flag)
+                pattern[len(pattern)-1].append(int(symbol[1]))
+                self.RecursiveMining(pattern, node, node.it_child_nodes[int(symbol[1])], minimum_support_threshold, new_Flag)
+                v = len(pattern[len(pattern)-1])
+                del pattern[len(pattern)-1][v-1]
 
     def Mining(self):
         minimum_support_threshold = int(ceil(self.percentage_threshold * len(self.D_prime)/100.0))
@@ -270,7 +274,7 @@ def ReadMetadata(file_name):
     return percentage_threshold, iteration_count
 
 
-directory = 'E:\Research\Incremental-Sequential-Pattern-Mining\Incremental-Sequential-Pattern-Mining-with-SP-Tree\Implementation\Dataset\Dataset17'
+directory = 'E:\Research\Incremental-Sequential-Pattern-Mining\Incremental-Sequential-Pattern-Mining-with-SP-Tree\Implementation\Dataset\Bible'
 percentage_threshold, iteration_count = ReadMetadata(directory+'\metadata.txt')
 pbincspan = PBIncSpan(percentage_threshold)
 for i in range(1,iteration_count+1):

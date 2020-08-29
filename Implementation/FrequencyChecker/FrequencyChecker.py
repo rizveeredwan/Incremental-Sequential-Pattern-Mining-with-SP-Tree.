@@ -117,6 +117,9 @@ class FrequencyChecker:
                 print(list)
                 matched = False
                 return matched
+            else:
+                print(self.patterns[i], found_support, calculated_support)
+                print(list)
         print("Match status = ", matched)
         return matched
 
@@ -126,13 +129,16 @@ class FrequencyChecker:
             self.iteration_count = int(lines[1].strip())
 
 file_directory = 'E:\Research\Incremental-Sequential-Pattern-Mining\Incremental-Sequential-Pattern-Mining-with-SP-Tree\Implementation\Dataset\Bible'
+#pattern_file_directory = 'E:\Research\Incremental-Sequential-Pattern-Mining\Incremental-Sequential-Pattern-Mining-with-SP-Tree\Implementation\PBIncSpan\Output\pbincspan-out'
+pattern_file_directory = 'E:\Research\Incremental-Sequential-Pattern-Mining\Incremental-Sequential-Pattern-Mining-with-SP-Tree\Implementation\Dataset\Bible\special'
 
 freq_checker = FrequencyChecker()
 freq_checker.ReadMetadataFile(file_directory+'\metadata.txt')
 for i in range(0,freq_checker.iteration_count):
     input_file_name = file_directory+"\in"+str(i+1)+'.txt'
     freq_checker.ReadDB(input_file_name)
-    pattern_file =  file_directory+"\out"+str(i+1)+'.txt'
+    #pattern_file =  file_directory+"\out"+str(i+1)+'.txt'
+    pattern_file = pattern_file_directory+str(i+1)+'.txt'
     freq_checker.ReadGeneratedPatterns(pattern_file)
     verdict = freq_checker.SanityChecking()
     print(pattern_file+" checking done\n\n")

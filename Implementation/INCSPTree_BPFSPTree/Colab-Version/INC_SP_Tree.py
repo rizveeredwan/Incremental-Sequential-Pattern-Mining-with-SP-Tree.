@@ -564,7 +564,10 @@ class INC_SP_Tree_Functionalities:
 
     def GettingFirstItem(self, item_bitset):
         item = item_bitset ^ (item_bitset-1)
+        safety = item
         item = int(floor(log(item,2)))
+        if(safety>(70368744177664)): # 1<<46
+            item = item-1
         return item
 
     def ReturnNodeCalculatedSupport(self, bpfsptree_node):

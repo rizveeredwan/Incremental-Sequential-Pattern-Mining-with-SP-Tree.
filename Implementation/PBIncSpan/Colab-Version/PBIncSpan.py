@@ -204,13 +204,15 @@ class PBIncSpan:
                 node.it_child_nodes[int(symbol[1])].frequency = len(node.it_child_nodes[int(symbol[1])].pseudo_projection)
         for item in fis:
             symbol = item.split('_')
-            p = pattern.copy()
             if(len(symbol) == 1):
-                p.append([int(symbol[0])])
-                self.RecursiveMining(p, node, node.seq_child_nodes[int(symbol[0])], minimum_support_threshold, new_Flag)
+                pattern.append([int(symbol[0])])
+                self.RecursiveMining(pattern, node, node.seq_child_nodes[int(symbol[0])], minimum_support_threshold, new_Flag)
+                del pattern[len(pattern)-1]
             elif(len(symbol) == 2):
-                p[len(p)-1].append(int(symbol[1]))
-                self.RecursiveMining(p, node, node.it_child_nodes[int(symbol[1])], minimum_support_threshold, new_Flag)
+                pattern[len(pattern)-1].append(int(symbol[1]))
+                self.RecursiveMining(pattern, node, node.it_child_nodes[int(symbol[1])], minimum_support_threshold, new_Flag)
+                v = len(pattern[len(pattern)-1])
+                del pattern[len(pattern)-1][v-1]
 
     def Mining(self, output_file_name):
         global pattern_count

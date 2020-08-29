@@ -569,7 +569,10 @@ class INC_SP_Tree_Functionalities:
 
     def GettingFirstItem(self, item_bitset):
         item = item_bitset ^ (item_bitset-1)
+        safety = item
         item = int(floor(log(item,2)))
+        if(safety>(70368744177664)): # 1<<46
+            item = item-1
         return item
 
     def ReturnNodeCalculatedSupport(self, bpfsptree_node):
@@ -612,25 +615,15 @@ class INC_SP_Tree_Functionalities:
                     return True
         return False
 
+    def GettingTheSetBeats(self,value):
+        symbols = []
+        for i in range(0,1000):
+            ans = value & (1<<i)
+            if(ans == (1<<i)):
+                symbols.append(i)
+        return symbols
+
     def IncrementalTreeMiner(self, modified_node_list, pattern, last_event_item_bitset, s_list, i_list, bpfsptree_node, cetables, cetablei, minimum_support_threshold, pass_no, add_count):
-        """
-        if(pattern == [[232],[7],[9]]):
-            print("YES")
-            sup = bpfsptree_node.support
-            sup2 = self.ReturnNodeCalculatedSupport(bpfsptree_node)
-            print(sup,sup2,len(bpfsptree_node.projection_nodes),len(modified_node_list))
-            dup = self.DuplicateNodeChecking(bpfsptree_node)
-            print("duplicate = ",dup)
-            for i in range(0,len(bpfsptree_node.projection_nodes)):
-                for j in range(0,len(bpfsptree_node.projection_nodes)):
-                    if(i==j):
-                        continue
-                    verdict = self.SearchingInUnderlineSubtree(bpfsptree_node.projection_nodes[i],bpfsptree_node.projection_nodes[j])
-                    if(verdict == True):
-                        break
-            if(verdict == True):
-                print("LIES IN SUBTREE")
-        """
 
         actual_support, over_support,over_support1, complete_over_support, actual_support1, total_node_support = 0,0,0,0,0,0
         sequence_extended_modified_sp_tree_nodes={}
@@ -653,10 +646,13 @@ class INC_SP_Tree_Functionalities:
         new_s_list = 0
         i_list_from_s_list = 0
         temp_list_bitset = s_list
+
+
         while s_list > 0 :
             symbol = self.GettingFirstItem(s_list)
             s_list = s_list & (s_list-1)
             verdict = True
+
             for j in range(0,len(pattern[len(pattern)-1])):
                 if(cetables.get(pattern[len(pattern)-1][j]) == None or cetables[pattern[len(pattern)-1][j]].get(symbol) == None or cetables[pattern[len(pattern)-1][j]][symbol] < minimum_support_threshold):
                     # CEtables violation
@@ -743,8 +739,6 @@ class INC_SP_Tree_Functionalities:
                         # completely new item: not even in the TLB
                         if(pass_no == 1):
                             over_support, actual_support, next_level_nodes, modified_nodes, checked_all = self.SequenceExtensionNormal(bpfsptree_node.projection_nodes, symbol, minimum_support_threshold, pass_no, bpfsptree_node.support)
-                            if(pattern == [[232],[7]] and symbol == 9):
-                                print("Came here = ", pattern, over_support, actual_support)
 
                             if(actual_support >= minimum_support_threshold):
 
