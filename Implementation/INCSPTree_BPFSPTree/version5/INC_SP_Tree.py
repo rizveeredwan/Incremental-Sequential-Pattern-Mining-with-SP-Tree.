@@ -5,6 +5,7 @@ from collections import deque
 
 total_created_node_count = 0
 debug_pattern = ""
+pattern_guni=0
 
 class ItemEventCombination:
     def __init__(self,item,event):
@@ -624,7 +625,6 @@ class INC_SP_Tree_Functionalities:
         return symbols
 
     def IncrementalTreeMiner(self, modified_node_list, pattern, last_event_item_bitset, s_list, i_list, bpfsptree_node, cetables, cetablei, minimum_support_threshold, pass_no, add_count):
-
         actual_support, over_support,over_support1, complete_over_support, actual_support1, total_node_support = 0,0,0,0,0,0
         sequence_extended_modified_sp_tree_nodes={}
         itemset_extended_modified_sp_tree_nodes={}

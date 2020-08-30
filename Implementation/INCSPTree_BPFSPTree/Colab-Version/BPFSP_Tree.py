@@ -17,10 +17,3 @@ class BPFSP_Tree:
         self.prev = None
         self.next = None
         # self.recursive_extension_end_linked_list_ptr=None
-
-# Recursive Extension End Linked List Pointer
-class RecursiveExtensionEndLinkedListPtr:
-    def __init__(self):
-        self.bpfsptree_node_ptr= None
-        self.previous_list_ptr= None
-        self.next_list_ptr= None

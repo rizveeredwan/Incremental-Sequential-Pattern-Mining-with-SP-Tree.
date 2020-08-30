@@ -268,19 +268,37 @@ def AverageItemsetLength(file_name):
                 count_item = count_item + len(sequence[j])
         print(count_item/(count_event*1.0))
 
+unique = {}
+def UniqueItemsInAFile(file_name):
+    global unique
+    with open(file_name,'r') as file:
+        lines = file.readlines()
+        for i in range(1,len(lines)):
+            line = lines[i].strip().split(' ')
+            line = line[1:len(line)]
+            StringToIntConverter(line)
+            sequence = GettingTheEvents(line)
+            for j in range(0,len(sequence)):
+                for k in range(0,len(sequence[j])):
+                    if(unique.get(sequence[j][k]) == None):
+                        unique[sequence[j][k]] = True
+    print(len(unique))
+
 #EventMerger('Bible/Bible.txt','Bible/Bible_Processed.txt')
 #SyntheticBasicDatasetMaker('c20d10k/c20d10k.txt','c20d10k/c20d10k_Processed.txt')
 
-
+"""
 directory_name = 'Bible'
 file_name = 'Bible_Processed.txt'
 initial_threshold_list = [90]
 initial_threshold = initial_threshold_list[random.randint(0,len(initial_threshold_list)-1)]
 incremental_threshold=[0.1]
 IncrementalDatabaseMaker(directory_name,directory_name+'/'+file_name, initial_threshold/100.0,incremental_threshold)
-
+"""
 
 #AvgNumberOfItemsetsRemoved('c20d10k/c20d10k_Processed.txt','c20d10k/in1.txt')
 #AverageSequenceLength('Kosarak25k/Kosarak25k_Processed.txt')
 #UniqueItemCount('t25i10d10k/t25i10d10k_Processed.txt')
 #AverageItemsetLength('Bible/Bible_Processed.txt')
+UniqueItemsInAFile('Bible/in1.txt')
+UniqueItemsInAFile('Bible/in2.txt')

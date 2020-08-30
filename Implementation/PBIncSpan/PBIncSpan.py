@@ -2,6 +2,8 @@ from PBIncSpanTree import PrefixTree
 from math import ceil
 import sys
 
+pattern_guni = 0
+
 class PBIncSpan:
     def __init__(self, percentage_threshold):
         self.D_prime = {}
@@ -149,7 +151,12 @@ class PBIncSpan:
                 return False
         return True
 
+
     def RecursiveMining(self, pattern, parent_node, node, minimum_support_threshold, Flag):
+        global pattern_guni
+        pattern_guni = pattern_guni + 1
+        print(pattern, pattern_guni)
+
         width_pruning = self.WidthPruning(node)
         if(width_pruning == True):
             return
@@ -210,7 +217,8 @@ class PBIncSpan:
         for item in fis:
             self.RecursiveMining([[int(item)]], self.root, self.root.seq_child_nodes[int(item)], minimum_support_threshold, Flag)
         self.PruneRedundantPatterns(self.root, minimum_support_threshold)
-        self.WritePatterns([],self.root, minimum_support_threshold)
+        print("printing")
+        #self.WritePatterns([],self.root, minimum_support_threshold)
 
     def PruneRedundantPatterns(self, node, minimum_support_threshold):
         redundant_item = []
@@ -281,5 +289,5 @@ for i in range(1,iteration_count+1):
     input_file_name = directory+'/in'+str(i)+'.txt'
     output_file_name = './Output/pbincspan-out'+str(i)+'.txt'
     pbincspan.ReadDB(input_file_name)
-    sys.stdout = open(output_file_name,'w')
+    #sys.stdout = open(output_file_name,'w')
     pbincspan.Mining()

@@ -9,6 +9,8 @@ PROJECT_PATH ='/content/drive/My Drive/Research Works/Incremental Sequential Pat
 #from BPFSP_Tree import BPFSP_Tree
 bpfsp_tree_module = SourceFileLoader('BPFSP_Tree', join(PROJECT_PATH, 'BPFSP_Tree.py')).load_module()
 
+pattern_guni = 0
+
 class ItemEventCombination:
     def __init__(self,item,event):
         self.item = item
