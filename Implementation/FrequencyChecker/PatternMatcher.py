@@ -19,7 +19,7 @@ class PatternMatcher:
         return True
 
 pattern_matcher = PatternMatcher()
-counter = 1
+counter = 2
 for i in range(1,counter+1):
     file1 = 'E:\Research\Incremental-Sequential-Pattern-Mining\Incremental-Sequential-Pattern-Mining-with-SP-Tree\Implementation\Dataset\Bible\out'+str(i)+'.txt'
     file2 = 'E:\Research\Incremental-Sequential-Pattern-Mining\Incremental-Sequential-Pattern-Mining-with-SP-Tree\Implementation\PBIncSpan\Output\pbincspan-out'+str(i)+'.txt'

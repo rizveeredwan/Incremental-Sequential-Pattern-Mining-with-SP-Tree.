@@ -647,11 +647,19 @@ class INC_SP_Tree_Functionalities:
         i_list_from_s_list = 0
         temp_list_bitset = s_list
 
-
+        prev = 0
         while s_list > 0 :
             symbol = self.GettingFirstItem(s_list)
+            prev = s_list
             s_list = s_list & (s_list-1)
             verdict = True
+
+            if(prev != (s_list | (1<<symbol))):
+                if(prev == (s_list | (1<<(symbol-1)))):
+                    symbol = symbol - 1
+                elif(prev == (s_list | (1<<(symbol+1)))):
+                    symbol = symbol + 1
+
 
             for j in range(0,len(pattern[len(pattern)-1])):
                 if(cetables.get(pattern[len(pattern)-1][j]) == None or cetables[pattern[len(pattern)-1][j]].get(symbol) == None or cetables[pattern[len(pattern)-1][j]][symbol] < minimum_support_threshold):
@@ -843,7 +851,14 @@ class INC_SP_Tree_Functionalities:
         while i_list>0:
 
             symbol = self.GettingFirstItem(i_list)
+            prev = i_list
             i_list = i_list & (i_list-1)
+
+            if(prev != (i_list | (1<<symbol))):
+                if(prev == (i_list | (1<<(symbol-1)))):
+                    symbol = symbol - 1
+                elif(prev == (i_list | (1<<(symbol+1)))):
+                    symbol = symbol + 1
 
 
             # heuristic i list checking

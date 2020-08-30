@@ -114,12 +114,13 @@ class FrequencyChecker:
             if(calculated_support != found_support):
                 print("Support value mismatched")
                 print(self.patterns[i], found_support, calculated_support)
-                print(list)
+                #print(list)
                 matched = False
                 return matched
             else:
-                print(self.patterns[i], found_support, calculated_support)
-                print(list)
+                pass
+                #print(self.patterns[i], found_support, calculated_support)
+                #print(list)
         print("Match status = ", matched)
         return matched
 
@@ -135,12 +136,14 @@ pattern_file_directory = 'E:\Research\Incremental-Sequential-Pattern-Mining\Incr
 freq_checker = FrequencyChecker()
 freq_checker.ReadMetadataFile(file_directory+'\metadata.txt')
 for i in range(0,freq_checker.iteration_count):
+    print("iteration_count ",i)
     input_file_name = file_directory+"\in"+str(i+1)+'.txt'
     freq_checker.ReadDB(input_file_name)
     #pattern_file =  file_directory+"\out"+str(i+1)+'.txt'
-    pattern_file = pattern_file_directory+str(i+1)+'.txt'
+    pattern_file = pattern_file_directory+str(1)+'.txt'
     freq_checker.ReadGeneratedPatterns(pattern_file)
     verdict = freq_checker.SanityChecking()
     print(pattern_file+" checking done\n\n")
     if(verdict == False):
+        continue
         break

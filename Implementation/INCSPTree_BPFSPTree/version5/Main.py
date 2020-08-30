@@ -253,7 +253,7 @@ input_file_name = ''
 for i in range(1,main.iteration_count_input+1):
     input_file_name = directory+'\in'+str(i)+'.txt'
     sys.stdin = open(input_file_name,'r')
-    sys.stdout = open(directory+'\out'+str(i)+'.txt','w')
+    #sys.stdout = open(directory+'\out'+str(i)+'.txt','w')
     # INC SP Tree build complete
     main.DatabaseInput()
     # Now need to mine
