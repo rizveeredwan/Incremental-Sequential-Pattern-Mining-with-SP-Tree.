@@ -282,7 +282,7 @@ def ReadMetadata(file_name):
     return percentage_threshold, iteration_count
 
 
-directory = 'E:\Research\Incremental-Sequential-Pattern-Mining\Incremental-Sequential-Pattern-Mining-with-SP-Tree\Implementation\Dataset\Bible'
+directory = 'E:\Research\Incremental-Sequential-Pattern-Mining\Incremental-Sequential-Pattern-Mining-with-SP-Tree\Implementation\Dataset\D20000-C10-T5-N1000'
 percentage_threshold, iteration_count = ReadMetadata(directory+'\metadata.txt')
 pbincspan = PBIncSpan(percentage_threshold)
 for i in range(1,iteration_count+1):

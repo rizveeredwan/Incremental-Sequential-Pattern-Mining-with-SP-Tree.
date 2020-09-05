@@ -105,8 +105,12 @@ class Main:
         if(self.cetables.get(item) == None):
             return s_list
         for key in self.cetables[item]:
-            if(self.cetables[item][key] >= minimum_support_threshold):
-                s_list = s_list | 1 << key
+            if(self.pass_no == 1):
+                if(self.cetables[item][key] >= minimum_support_threshold):
+                    s_list = s_list | 1 << key
+            else :
+                if(self.cetables[item][key] >= minimum_support_threshold and self.complete_set_of_modified_nodes.get(key) != None):
+                    s_list = s_list | 1 << key
         return s_list
 
     def MakingIList(self, item, minimum_support_threshold):
@@ -114,8 +118,12 @@ class Main:
         if(self.cetablei.get(item) == None):
             return i_list
         for key in self.cetablei[item]:
-            if(key > item and self.cetablei[item][key] >= minimum_support_threshold):
-                i_list = i_list | 1 << key
+            if(self.pass_no == 1):
+                if(key > item and self.cetablei[item][key] >= minimum_support_threshold):
+                    i_list = i_list | 1 << key
+            else:
+                if(key > item and self.cetablei[item][key] >= minimum_support_threshold and self.complete_set_of_modified_nodes.get(key) != None):
+                    i_list = i_list | 1 << key
         return i_list
 
     def CreatingNodeFromBPFSPTree(self, item, actual_support, projection_nodes, pass_no):
@@ -188,9 +196,9 @@ class Main:
         # updating the minimum support threshold
         self.minimum_support_threshold_previous = minimum_support_threshold
         # Printing the bi directional projection pointer based frequent sequential pattern tree
-        #print("Printing Tree")
+        print("Printing Tree")
         #self.inc_sp_tree_functionalities.PrintINCSPTree(self.inc_sp_tree_root)
-        self.PrintBPFSPTree(self.bpfsptree_root,[])
+        #self.PrintBPFSPTree(self.bpfsptree_root,[])
 
     def MemoryUsage(self):
         process = psutil.Process(os.getpid())
@@ -241,7 +249,7 @@ class Main:
 
 
 
-directory = 'E:\Research\Incremental-Sequential-Pattern-Mining\Incremental-Sequential-Pattern-Mining-with-SP-Tree\Implementation\Dataset\Bible'
+directory = 'E:\Research\Incremental-Sequential-Pattern-Mining\Incremental-Sequential-Pattern-Mining-with-SP-Tree\Implementation\Dataset\D50K-C10-T2.5-N10k'
 
 main = Main()
 # read percentage threshold and iteration count
@@ -257,6 +265,7 @@ for i in range(1,main.iteration_count_input+1):
     # INC SP Tree build complete
     main.DatabaseInput()
     # Now need to mine
+    print("Mining started")
     main.InitiateCompleteMining()
     # printing process time
 

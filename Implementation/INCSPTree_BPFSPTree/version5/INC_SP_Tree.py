@@ -625,6 +625,9 @@ class INC_SP_Tree_Functionalities:
         return symbols
 
     def IncrementalTreeMiner(self, modified_node_list, pattern, last_event_item_bitset, s_list, i_list, bpfsptree_node, cetables, cetablei, minimum_support_threshold, pass_no, add_count):
+        global pattern_guni
+        pattern_guni = pattern_guni + 1
+        print(pattern,pattern_guni)
         actual_support, over_support,over_support1, complete_over_support, actual_support1, total_node_support = 0,0,0,0,0,0
         sequence_extended_modified_sp_tree_nodes={}
         itemset_extended_modified_sp_tree_nodes={}
@@ -647,12 +650,18 @@ class INC_SP_Tree_Functionalities:
         i_list_from_s_list = 0
         temp_list_bitset = s_list
 
+        # debug
+        debug_total = 0
+
         prev = 0
         while s_list > 0 :
             symbol = self.GettingFirstItem(s_list)
             prev = s_list
             s_list = s_list & (s_list-1)
             verdict = True
+
+            # debug
+            debug_total = debug_total + 1
 
             if(prev != (s_list | (1<<symbol))):
                 if(prev == (s_list | (1<<(symbol-1)))):
@@ -1044,6 +1053,8 @@ class INC_SP_Tree_Functionalities:
                 self.CreateNewRecursiveExtensionEndListPtr(bpfsptree_node)
                 # completed all the works
 
+        # debug
+        print(debug_total,len(sequence_extended_modified_sp_tree_nodes))
 
         # Recursive Extension
         # sequence Extension

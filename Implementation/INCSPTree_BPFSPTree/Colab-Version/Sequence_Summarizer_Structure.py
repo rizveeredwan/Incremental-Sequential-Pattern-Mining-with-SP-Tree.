@@ -56,6 +56,11 @@ class SequenceSummarizerStructure:
                     value1 = value
                     value = result ^ value # Got set bit
                     value = int(floor(log(value,2)))
+                    if(value >= 40 and result != (value1 | (1<<value))):
+                        if(result == (value1 | (1<<(value+1)))):
+                            value = value + 1
+                        elif(value>0 and result == (value1 | (1<<(value-1)))):
+                            value = value - 1
                     if(cetablei.get(value) == None):
                         cetablei[value]={}
                     if(cetablei[value].get(item) == None):
