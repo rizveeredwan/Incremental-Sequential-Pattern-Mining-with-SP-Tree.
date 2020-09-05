@@ -117,7 +117,7 @@ def IncrementalDatabaseMakerNew(directory_name,file_name, initial_threshold,incr
             sid.append(i)
         n = floor(initial_threshold * len(sequence_database))
         r_inc = len(sequence_database)-n
-        print(r_inc,n,)
+        print(r_inc,n)
         # completely new
         database = {}
         while(len(database)<r_inc):
@@ -148,13 +148,18 @@ def IncrementalDatabaseMakerNew(directory_name,file_name, initial_threshold,incr
                     del initial_database[index+1]
 
         print("incremental database done 2")
-        initial_database = {}
+        save = []
+        for key in range(0,len(sequence_database)):
+            if(initial_database.get(key+1) == None and database.get(key+1)==None):
+                save.append(key)
+        print(len(save),len(database),len(initial_database),len(sequence_database))
         while(len(initial_database)<n):
-            index = random.randint(0,len(sequence_database)-1)
-            if(initial_database.get(index+1) == None):
-                initial_database[index+1] = []
-                for j in range(0,len(sequence_database[index])):
-                    initial_database[index+1].append(sequence_database[index][j])
+            index1 = random.randint(0,len(save)-1)
+            index = save[index1]
+            del save[index1]
+            initial_database[index+1]=[]
+            for j in range(0,len(sequence_database[index])):
+                initial_database[index+1].append(sequence_database[index][j])
         WriteIntoIncrementalFile(directory_name+'/in'+str(1)+'.txt',initial_database)
         WriteIntoIncrementalFile(directory_name+'/in'+str(2)+'.txt',database)
         f=open(directory_name+'/metadata.txt','w')
@@ -357,13 +362,13 @@ def UniqueItemsInAFile(file_name):
 #SyntheticBasicDatasetMaker('c20d10k/c20d10k.txt','c20d10k/c20d10k_Processed.txt')
 
 
-directory_name = 'Bible_R_new'
-file_name = 'Bible_R_new_Processed.txt'
-initial_threshold_list = [80]
+directory_name = 'Bible_R_com'
+file_name = 'Bible_R_com_Processed.txt'
+initial_threshold_list = [90]
 initial_threshold = initial_threshold_list[random.randint(0,len(initial_threshold_list)-1)]
-incremental_threshold=[20]
+incremental_threshold=[0.1]
 #IncrementalDatabaseMaker(directory_name,directory_name+'/'+file_name, initial_threshold/100.0,incremental_threshold)
-old_database = 0.50
+old_database = 0.2
 rf = 0.8
 IncrementalDatabaseMakerNew(directory_name,directory_name+'/'+file_name, initial_threshold/100.0,incremental_threshold, old_database, rf)
 
