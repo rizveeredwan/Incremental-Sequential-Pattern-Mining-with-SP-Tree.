@@ -17,4 +17,4 @@ A novel technique to mine sequential patterns from incremental sequential databa
 
 - First value denotes the number of transactions
 - Each line denotes a transaction, multi-itemed event is considered, each event's ending is denoted with -1 value, all the events are ordered. 
-- Sample of the dataset can be found in .\Implementation\Dataset\Dataset2 folder. in1.txt, in2.txt, ..., denotes incremental database addition 
+- Sample of the dataset can be found in `.\Implementation\Dataset\Dataset2` folder. in1.txt, in2.txt, ..., denotes incremental database addition 
