@@ -1,5 +1,5 @@
 # Incremental-Sequential-Pattern-Mining-with-SP-Tree.
-A novel technique to mine sequential patterns from incremental sequential database using SP-Tree. The code can be found in '.\implementation\INCSPTree_BPFSPTree\version5 folder'. The code begins from Main.py file. The dataset format is given below. 
+A novel technique to mine sequential patterns from incremental sequential database using SP-Tree. The code can be found in `.\implementation\INCSPTree_BPFSPTree\version5 folder`. The code begins from Main.py file. The dataset format is given below. 
 
 ```
 10
