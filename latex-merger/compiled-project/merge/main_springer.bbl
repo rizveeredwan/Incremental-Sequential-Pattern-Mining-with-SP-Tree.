@@ -1,0 +1,216 @@
+\begin{thebibliography}{10}
+
+\bibitem{Spam}
+J.~Ayres, J.~Flannick, J.~Gehrke, and T.~Yiu.
+\newblock Sequential pattern mining using a bitmap representation.
+\newblock In {\em KDD}, pages 429--435. ACM, 2002.
+
+\bibitem{borgelt2005implementation}
+C.~Borgelt.
+\newblock An implementation of the fp-growth algorithm.
+\newblock In {\em Proceedings of the 1st international workshop on open source
+  data mining: frequent pattern mining implementations}, pages 1--5, 2005.
+
+\bibitem{chang2007imcs}
+L.~Chang, D.~Yang, T.~Wang, and S.~Tang.
+\newblock Imcs: Incremental mining of closed sequential patterns.
+\newblock In {\em Advances in Data and Web Management}, pages 50--61. Springer,
+  2007.
+
+\bibitem{chen2009updown}
+J.~Chen.
+\newblock An updown directed acyclic graph approach for sequential pattern
+  mining.
+\newblock {\em IEEE TKDE}, 22(7):913--928, 2009.
+
+\bibitem{chen2007incremental}
+Y.~Chen, J.~Guo, Y.~Wang, Y.~Xiong, and Y.~Zhu.
+\newblock Incremental mining of sequential patterns using prefix tree.
+\newblock In {\em PAKDD}, pages 433--440. Springer, 2007.
+
+\bibitem{cheng2004incspan}
+H.~Cheng, X.~Yan, and J.~Han.
+\newblock Incspan: incremental mining of sequential patterns in large database.
+\newblock In {\em KDD}, pages 527--532, 2004.
+
+\bibitem{he2019significance}
+Z.~\color{blue} He, S.~Zhang, and J.~Wu.
+\newblock Significance-based discriminative sequential pattern mining.
+\newblock {\em Expert Systems with Applications}, 122:54--64,
+  2019\color{black}.
+
+\bibitem{hosseininasab2019constraint}
+A.~\color{blue} Hosseininasab, W.-J. van Hoeve, and A.~A. Cire.
+\newblock Constraint-based sequential pattern mining with decision diagrams.
+\newblock In {\em Proceedings of the AAAI Conference on Artificial
+  Intelligence}, volume~33, pages 1495--1502, 2019\color{black}.
+
+\bibitem{lin2015incrementally}
+J.~C.-W. \color{blue} Lin, T.-P. Hong, W.~Gan, H.-Y. Chen, and S.-T. Li.
+\newblock Incrementally updating the discovered sequential patterns based on
+  pre-large concept.
+\newblock {\em IDA}, 19(5):1071--1089, 2015\color{black}.
+
+\bibitem{saleti2019mapreduce}
+S.~\color{blue} Saleti and R.~Subramanyam.
+\newblock A mapreduce solution for incremental mining of sequential patterns
+  from big data.
+\newblock {\em Expert Systems With Applications}, 133:109--125,
+  2019\color{black}.
+
+\bibitem{tarus2018hybrid}
+J.~K. \color{blue}Tarus, Z.~Niu, and D.~Kalui.
+\newblock A hybrid recommender system for e-learning based on context awareness
+  and sequential pattern mining.
+\newblock {\em Soft Computing}, 22(8):2449--2461, 2018\color{black}.
+
+\bibitem{fournier2014fast}
+P.~Fournier-Viger, A.~Gomariz, M.~Campos, and R.~Thomas.
+\newblock Fast vertical mining of sequential patterns using co-occurrence
+  information.
+\newblock In {\em PAKDD}, pages 40--52. Springer, 2014.
+
+\bibitem{fournier2017survey}
+P.~Fournier-Viger, J.~C.-W. Lin, R.~U. Kiran, Y.~S. Koh, and R.~Thomas.
+\newblock A survey of sequential pattern mining.
+\newblock {\em Data Science and Pattern Recognition}, 1(1):54--77, 2017.
+
+\bibitem{gan2019survey}
+W.~Gan, J.~C.-W. Lin, P.~Fournier-Viger, H.-C. Chao, and P.~S. Yu.
+\newblock A survey of parallel sequential pattern mining.
+\newblock {\em TKDD}, 13(3):1--34, 2019.
+
+\bibitem{grahne2005fast}
+G.~Grahne and J.~Zhu.
+\newblock Fast algorithms for frequent itemset mining using fp-trees.
+\newblock {\em IEEE TKDE}, 17(10):1347--1362, 2005.
+
+\bibitem{guidotti2018personalized}
+R.~Guidotti, G.~Rossetti, L.~Pappalardo, F.~Giannotti, and D.~Pedreschi.
+\newblock Personalized market basket prediction with temporal annotated
+  recurring sequences.
+\newblock {\em IEEE TKDE}, 31(11):2151--2163, 2019.
+
+\bibitem{hong2001new}
+T.-P. Hong, C.-Y. Wang, and Y.-H. Tao.
+\newblock A new incremental data mining algorithm using pre-large itemsets.
+\newblock {\em Intelligent Data Analysis}, 5(2):111--129, 2001.
+
+\bibitem{hong2011incremental}
+T.-P. Hong, C.-Y. Wang, and S.-S. Tseng.
+\newblock An incremental mining algorithm for maintaining sequential patterns
+  using pre-large sequences.
+\newblock {\em Expert Syst Appl}, 38(6):7051--7058, 2011.
+
+\bibitem{huang2008general}
+J.-W. Huang, C.-Y. Tseng, J.-C. Ou, and M.-S. Chen.
+\newblock A general model for sequential pattern mining with a progressive
+  database.
+\newblock {\em IEEE TKDE}, 20(9):1153--1167, 2008.
+
+\bibitem{leung2007cantree}
+C.~K.-S. Leung, Q.~I. Khan, Z.~Li, and T.~Hoque.
+\newblock Cantree: a canonical-order tree for incremental frequent-pattern
+  mining.
+\newblock {\em Knowledge and Information Systems}, 11(3):287--311, 2007.
+
+\bibitem{lin2004incremental}
+M.-Y. Lin and S.-Y. Lee.
+\newblock Incremental update on sequential patterns in large databases by
+  implicit merging and efficient counting.
+\newblock {\em Information Systems}, 29(5):385--404, 2004.
+
+\bibitem{lin2007discover}
+N.~P. Lin, W.-H. Hao, H.-J. Chen, E.~Hao, and C.~Chang.
+\newblock Discover sequential patterns in incremental database.
+\newblock {\em International Journal of Computers}, 1:196--201, 2007.
+
+\bibitem{liu2012incremental}
+J.~Liu, S.~Yan, Y.~Wang, and J.~Ren.
+\newblock Incremental mining algorithm of sequential patterns based on sequence
+  tree.
+\newblock In {\em Advances in Intelligent Systems}, pages 61--67. Springer,
+  2012.
+
+\bibitem{mallick2013incremental}
+B.~Mallick, D.~Garg, and P.~Grover.
+\newblock Incremental mining of sequential patterns: Progress and challenges.
+\newblock {\em Intelligent Data Analysis}, 17(3):507--530, 2013.
+
+\bibitem{masseglia2003incremental}
+F.~Masseglia, P.~Poncelet, and M.~Teisseire.
+\newblock Incremental mining of sequential patterns in large databases.
+\newblock {\em Data \& Knowledge Engineering}, 46(1):97--121, 2003.
+
+\bibitem{okolica2018sequence}
+J.~S. Okolica, G.~L. Peterson, R.~F. Mills, and M.~R. Grimaila.
+\newblock Sequence pattern mining with variables.
+\newblock {\em IEEE TKDE}, 32(1):177--187, 2020.
+
+\bibitem{parthasarathy1999incremental}
+S.~Parthasarathy, M.~J. Zaki, M.~Ogihara, and S.~Dwarkadas.
+\newblock Incremental and interactive sequence mining.
+\newblock In {\em Proc. of eighth CIKM}, pages 251--258, 1999.
+
+\bibitem{han2001prefixspan}
+J.~Pei, J.~Han, B.~Mortazavi-Asl, J.~Wang, H.~Pinto, Q.~Chen, U.~Dayal, and
+  M.-C. Hsu.
+\newblock Mining sequential patterns by pattern-growth: The prefixspan
+  approach.
+\newblock {\em IEEE TKDE}, 16(11):1424--1440, 2004.
+
+\bibitem{perera2008clustering}
+D.~Perera, J.~Kay, I.~Koprinska, K.~Yacef, and O.~R. Za{\"\i}ane.
+\newblock Clustering and sequential pattern mining of online collaborative
+  learning data.
+\newblock {\em IEEE TKDE}, 21(6):759--772, 2008.
+
+\bibitem{rizvee2020tree}
+R.~A. Rizvee, M.~F. Arefin, and C.~F. Ahmed.
+\newblock Tree-miner: Mining sequential patterns from sp-tree.
+\newblock In {\em PAKDD}, pages 44--56. Springer, 2020.
+
+\bibitem{Fast}
+E.~Salvemini, F.~Fumarola, D.~Malerba, and J.~Han.
+\newblock Fast sequence mining based on sparse id-lists.
+\newblock In {\em ISMIS}, pages 316--325. Springer, 2011.
+
+\bibitem{slimani2013sequential}
+T.~Slimani and A.~Lazzez.
+\newblock Sequential mining: patterns and algorithms analysis.
+\newblock {\em arXiv preprint arXiv:1311.0350}, 2013.
+
+\bibitem{srikant1996mining}
+R.~Srikant and R.~Agrawal.
+\newblock Mining sequential patterns: Generalizations and performance
+  improvements.
+\newblock In {\em International Conference on Extending Database Technology},
+  pages 1--17. Springer, 1996.
+
+\bibitem{wang1997discovering}
+K.~Wang.
+\newblock Discovering patterns from large and dynamic sequential data.
+\newblock {\em JIIS}, 9(1):33--56, 1997.
+
+\bibitem{Lapin}
+Z.~Yang, Y.~Wang, and M.~Kitsuregawa.
+\newblock Lapin: effective sequential pattern mining algorithms by last
+  position induction for dense databases.
+\newblock In {\em DASFAA}, pages 1020--1023. Springer, 2007.
+
+\bibitem{zaki2001spade}
+M.~J. Zaki.
+\newblock Spade: An efficient algorithm for mining frequent sequences.
+\newblock {\em Machine learning}, 42(1-2):31--60, 2001.
+
+\bibitem{zhang2002efficient}
+M.~Zhang, B.~Kao, D.~Cheung, and C.-L. Yip.
+\newblock Efficient algorithms for incremental update of frequent sequences.
+\newblock In {\em PAKDD}, pages 186--197. Springer, 2002.
+
+\bibitem{zheng2002algorithms}
+Q.~Zheng, K.~Xu, S.~Ma, and W.~Lv.
+\newblock The algorithms of updating sequential patterns.
+\newblock {\em arXiv preprint cs/0203027}, 2002.
+
+\end{thebibliography}

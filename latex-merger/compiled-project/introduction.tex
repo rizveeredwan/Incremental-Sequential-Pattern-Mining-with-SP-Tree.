@@ -1,0 +1,221 @@
+\section{Introduction}\label{sec:introduction}
+% Computer Society journal (but not conference!) papers do something unusual
+% with the very first section heading (almost always called "Introduction").
+% They place it ABOVE the main text! IEEEtran.cls does not automatically do
+% this for you, but you can achieve this effect with the provided
+% \IEEEraisesectionheading{} command. Note the need to keep any \label that
+% is to refer to the section immediately after \section in the above as
+% \IEEEraisesectionheading puts \section within a raised box.
+
+
+
+
+% The very first letter is a 2 line initial drop letter followed
+% by the rest of the first word in caps (small caps for compsoc).
+% 
+% form to use if the first word consists of a single letter:
+% \IEEEPARstart{A}{demo} file is ....
+% 
+% form to use if you need the single drop letter followed by
+% normal text (unknown if ever used by the IEEE):
+% \IEEEPARstart{A}{}demo file is ....
+% 
+% Some journals put the first two words in caps:
+% \IEEEPARstart{T}{his demo} file is ....
+% 
+% Here we have the typical use of a "T" for an initial drop letter
+% and "HIS" in caps to complete the first word.
+The idea of pattern mining problem was introduced to discover interesting characteristics or behavior from the database. Due to the wide variation of database characteristics pattern mining problem has been divided into numerous sub-domains, among which Sequential Pattern Mining (SPM) problem stands out because of its wide range of variations. SPM problem targets to discover frequent sequential patterns from an ordered or sequential database. In Table \ref{table:example_static_database}, we have shown an example of a camera market sequential database where each entry denotes a customer's purchase history. Items within same bracket denotes a transaction for that customer. So, a record is a collection of ordered transactions for that customer. SPM problem will try to discover different types of ordered relationships from this dataset, such as the generic SPM problem will try to discover the ordered item clusters which are frequently purchased. Being first introduced in \cite{srikant1996mining} based on market basket analogy, the SPM problem has found its usage in numerous applications, e.g., web usage mining, customer behavior analysis, DNA sequence mining, etc.
+
+Due to having numerous applications, a wide range of literature has addressed SPM problem and provided solutions which can be broadly categorized into two groups: apriori based and pattern growth based. Apriori based approaches follow candidate generation and testing paradigm and pattern growth approaches follow the projected database or database shrink concept with pattern's gradual extension. Pattern growth approaches are significantly faster compared to apriori approach \cite{borgelt2005implementation}. In traditional itemset mining it has been shown that tree structure alike approaches provide more control over the database which ultimately helps improve the mining runtime\cite{leung2007cantree,borgelt2005implementation} and incorporate new strategies. But due to the problem complexity, the tree alike structures of the itemset mining were not suitable for SPM problem and a structural solution was yet to be proposed. Based on this motivation, in this study, we have proposed a novel tree structure \textit{SP-Tree} to represent the sequential database in a structured format and an efficient mining algorithm \textit{Tree-Miner} to mine sequential patterns using the node properties of \textit{SP-Tree}. The advantage of the proposed tree structure is, it provides efficient structured control over the database and pattern space which ultimately leads to a faster generation of the patterns. An important motivation behind designing such a structure was, if we had a structured format of the database, it would have given the advantage to adopt new pruning strategies and control the manipulation of the database when the database can change based on other parameters, e.g, incremental database, stream database, etc. Our incremental solution is the result of prior motivation.
+
+
+
+\begin{table*}[!t]
+\parbox{.5\linewidth}{
+\centering
+\begin{tabular}{|c|c|}
+\hline
+sid & Sequence\\
+\hline
+1 & \textless (camera, kit lens) \\
+& (50 mm prime lens)   \\
+& (tripod) \textgreater\\ 
+\hline
+2 & \textless (camera, kit lens)   \\ 
+& (85 mm prime lens) \\ 
+& (tripod) \textgreater \\ 
+\hline 
+3 & \textless (camera, kit lens)\\
+& (tripod) \textgreater \\ 
+\hline 
+4 & \textless (camera, kit lens) \\
+& (50 mm prime lens) \\ 
+& (85 mm prime lens) \textgreater \\ 
+\hline 
+\end{tabular}
+\caption{Initial Camera Market Dataset} \label{table:example_static_database}
+}
+\hfill
+\parbox{.5\linewidth}{
+\centering
+\begin{tabular}{|c|c|c|}
+\hline
+sid & New Sequence & Type\\
+\hline
+1 & \textless (ND Filter, Reverse Ring) \textgreater & Append\\
+\hline
+2 & $\phi$ & - \\
+\hline 
+3 & $\phi$ & - \\
+\hline 
+4  & $\phi$ & - \\
+\hline
+5 & \textless (camera, kit lens) \textgreater & Insert\\ 
+\hline 
+\end{tabular}
+\caption{Additional update in Database} \label{table:example_incremental_database}
+}
+\end{table*}
+
+Generic SPM problem focuses on mining frequent sequential patterns from the static sequential databases
+\cite{rizvee2020tree,srikant1996mining,zaki2001spade,han2001prefixspan,fournier2014fast,chen2009updown,perera2008clustering,okolica2018sequence,guidotti2018personalized}. But in real-life applications, most of the time, the database is found not to be static; rather gets increased time to time with more information \cite{mallick2013incremental}. With increased database size, patterns' distribution can vary significantly which necessitates the urge to mine again over the updated complete database. But, mining sequential patterns over the complete database is a very costly operation. So re-mining over the updated database again from scratch creates several performance and resource bottleneck. From these motivations the problem of Incremental Sequential Pattern Mining (ISPM) was introduced in \cite{wang1997discovering} to tackle the challenge of re-mining over the complete database rather than focusing more over the efficient handling of the new incremental database or increased part of the database \cite{mallick2013incremental,slimani2013sequential,fournier2017survey,huang2008general}. 
+
+In Table \ref{table:example_incremental_database}, we have shown an example of incremental version of our prior static database shown in Table \ref{table:example_static_database}. Here, two sequences newly appeared. First one as an appended sequence to the existing sequence with identifier ($sid$) 1 and the fifth one is an inserted sequence with a new $sid(5)$ which increases database length. $\phi$ means there was no new sequence as appended or inserted for the corresponding $sid$. Here the updated incremental database will be the concatenation of two databases. The solutions to the ISPM problems focus on developing new strategies to efficiently discover the complete set of updated frequent patterns from this modified database rather than re-mining from scratch.     
+
+There are several crucial challenges in ISPM problems due to the problem's nature. For example - handling the modification of existing sequences ($Append$), the addition of completely new appearing sequences ($Insert$), ratio of the incremental database vs existing database, updating the existing data structures, the change in the frequent patterns' distribution or concept drift, empirically setting the extra introduced parameters to control the candidate buffers
+\cite{cheng2004incspan,lin2015incrementally} etc. In summary, several issues exist which control the efficiency, applicability and complexity of the solution to approach the ISPM problems and thus numerous literature have addressed this problem \cite{lin2004incremental,cheng2004incspan,liu2012incremental,lin2015incrementally,saleti2019mapreduce}. In this study, we have also proposed a new tree-based solution, \textit{IncTree-Miner} based on \textit{IncSP-Tree} to approach the ISPM problem which provides an efficient manner and structural advantage to implicitly track the incremental database and the patterns which are affected by it.
+ 
+
+The usage of co-occurrence information can significantly reduce the search space which has been discussed in many literature\cite{fournier2014fast,fournier2017survey,saleti2019mapreduce}. Our solutions have also adopted this concept. This information states the relationship among the items which guides during pattern extension. But it becomes a challenge on how to efficiently update this information for a gradually increasing database. To solve this issue, we have proposed a novel structure \textit{Sequence Summarizer} which helps calculate such information efficiently especially in an incremental environment. This novel structure is also helpful to perform the \textit{Append} operation over the existing sequences.
+
+The main challenges of any SPM problem are reducing the number of database ($DB$) scans, making the $DB$ scans faster, reducing the search space, and detecting the infrequent patterns early during support calculation. In our proposed structures we have introduced the idea of $next\_link$ which makes the DB scans significantly faster. Also utilizing the tree properties we have developed two new pruning strategies: a breadth-first based support counting technique which helps detect the infrequent patterns early before calculating complete support and a heuristic strategy to reduce the search space. 
+
+As, with database increment, the support of the patterns gets updated in each iteration, popular literature maintain a tree alike structure to keep the patterns' support \cite{chen2007incremental,liu2012incremental,lin2015incrementally}. In this study, we further investigate this approach and design a new Bi-directional Projection Pointer Based Frequent Sequential Pattern Tree (\textit{BPFSP-Tree}) which keeps the frequent sequential patterns, their support, and projection pointers using the node structure of \textit{IncSP-Tree}. It helps reduce the number of DB scans and provides an efficient mechanism to remove the non-frequent patterns which were previously frequent.
+
+
+Because of various crucialities of the ISPM problem, different literature have adopted different types of strategies to solve them. Among them, many introduced additional parameters or concepts such as negative border \cite{zheng2002algorithms}, semi-buffer \cite{cheng2004incspan}, pre-large with upper and lower thresholds \cite{lin2015incrementally} etc. The main problem of additional parameters is that the solution's performance and complexity largely depend on the appropriate selection of these parameters and their mutual dependency and it is difficult to estimate database characteristics prior. Also, these approaches are severely affected due to concept drift and create resource misuse and bottleneck.  Based on these observations, we wanted to reduce the parameters' dependency and stick to the single traditional support threshold parameter. Besides, our approach is a new take to generic SPM problem. So, it is also flexible to other modules. Moreover, our proposed structure stores the complete database in an efficient format. So, it is also able to handle the absence of prior database in stream mining and runtime threshold parameter change. In summary, our main contributions are as follows -
+
+\begin{enumerate}
+    \item We have proposed two new tree-based solutions, an efficient \textit{Tree-Miner} algorithm based on a novel tree structure \textit{SP-Tree} and an efficient \textit{IncTree-Miner} algorithm based on a novel tree structure \textit{IncSP-Tree} to solve the SPM problem for static and incremental databases, respectively.
+    \item Based on the tree properties, we have designed two new pruning strategies: an efficient breadth-first based support counting technique and and a heuristic pruning strategy.
+    \item A novel structure \textit{Sequence Summarizer} is proposed to efficiently calculate and update the co-occurrence information and perform $Append$ operation during database increment.
+    \item A new structure \textit{BPFSP-Tree} to store the frequent sequences along with projection pointers to reduce the DB scan and efficiently remove the infrequent patterns.
+    \item A Discussion regarding efficiency and effectiveness of our proposed solutions and issues related to implementation.
+\end{enumerate}
+
+The preliminary version of the current study has been published in \cite{rizvee2020tree}. These two literature focuses on designing new tree-based solutions to approach the SPM problem by providing a new viewing angle. The prior study proposed a tree-based solution to solve static SPM problem while the current literature has added the following new materials, 
+
+\begin{itemize}
+    \item More detailed and comprehensive discussion with additional examples to discuss \textit{Tree-Miner} algorithm based on SP-Tree to solve the static SPM problem.
+    \item Addition of two new pruning strategies based on SP-Tree structures. 
+    \item A novel approach to solve the incremental SPM problem with a new incremental mining algorithm \textit{IncTree-Miner} over an extended SP-Tree structure, \textit{IncSP-Tree} with additional discussion about various crucial aspects related to implementation and incremental environment. 
+    \item More detailed and extensive experimental results to discuss the novelty of the proposals along with more examples, analysis and discussion.
+\end{itemize}
+
+% and issues related to the implementations and improvisations. 
+The rest of the paper is organized as follows. Related works are discussed in Section \ref{related_works}. We formulate our addressed problem in section \ref{problem_definition} and discuss our proposals in Section \ref{proposals}. In Section \ref{evaluation}, we evaluate our solutions based on various metrics by conducting experiments on both real-life and synthetic datasets and finally we conclude this study with an overall summary and the possibility of future extensions in Section \ref{conclusion}. 
+
+%\subsection{Subsection Heading Here}
+%Subsection text here.
+
+% needed in second column of first page if using \IEEEpubid
+%\IEEEpubidadjcol
+
+%\subsubsection{Subsubsection Heading Here}
+%Subsubsection text here without citation \cite{rasheed2010efficient}
+
+% An example of a floating figure using the graphicx package.
+% Note that \label must occur AFTER (or within) \caption.
+% For figures, \caption should occur after the \includegraphics.
+% Note that IEEEtran v1.7 and later has special internal code that
+% is designed to preserve the operation of \label within \caption
+% even when the captionsoff option is in effect. However, because
+% of issues like this, it may be the safest practice to put all your
+% \label just after \caption rather than within \caption{}.
+%
+% Reminder: the "draftcls" or "draftclsnofoot", not "draft", class
+% option should be used if it is desired that the figures are to be
+% displayed while in draft mode.
+%
+%\begin{figure}[!t]
+%\centering
+%\includegraphics[width=2.5in]{myfigure}
+% where an .eps filename suffix will be assumed under latex, 
+% and a .pdf suffix will be assumed for pdflatex; or what has been declared
+% via \DeclareGraphicsExtensions.
+%\caption{Simulation results for the network.}
+%\label{fig_sim}
+%\end{figure}
+
+% Note that the IEEE typically puts floats only at the top, even when this
+% results in a large percentage of a column being occupied by floats.
+% However, the Computer Society has been known to put floats at the bottom.
+
+
+% An example of a double column floating figure using two subfigures.
+% (The subfig.sty package must be loaded for this to work.)
+% The subfigure \label commands are set within each subfloat command,
+% and the \label for the overall figure must come after \caption.
+% \hfil is used as a separator to get equal spacing.
+% Watch out that the combined width of all the subfigures on a 
+% line do not exceed the text width or a line break will occur.
+%
+%\begin{figure*}[!t]
+%\centering
+%\subfloat[Case I]{\includegraphics[width=2.5in]{box}%
+%\label{fig_first_case}}
+%\hfil
+%\subfloat[Case II]{\includegraphics[width=2.5in]{box}%
+%\label{fig_second_case}}
+%\caption{Simulation results for the network.}
+%\label{fig_sim}
+%\end{figure*}
+%
+% Note that often IEEE papers with subfigures do not employ subfigure
+% captions (using the optional argument to \subfloat[]), but instead will
+% reference/describe all of them (a), (b), etc., within the main caption.
+% Be aware that for subfig.sty to generate the (a), (b), etc., subfigure
+% labels, the optional argument to \subfloat must be present. If a
+% subcaption is not desired, just leave its contents blank,
+% e.g., \subfloat[].
+
+
+% An example of a floating table. Note that, for IEEE style tables, the
+% \caption command should come BEFORE the table and, given that table
+% captions serve much like titles, are usually capitalized except for words
+% such as a, an, and, as, at, but, by, for, in, nor, of, on, or, the, to
+% and up, which are usually not capitalized unless they are the first or
+% last word of the caption. Table text will default to \footnotesize as
+% the IEEE normally uses this smaller font for tables.
+% The \label must come after \caption as always.
+%
+%\begin{table}[!t]
+%% increase table row spacing, adjust to taste
+%\renewcommand{\arraystretch}{1.3}
+% if using array.sty, it might be a good idea to tweak the value of
+% \extrarowheight as needed to properly center the text within the cells
+%\caption{An Example of a Table}
+%\label{table_example}
+%\centering
+%% Some packages, such as MDW tools, offer better commands for making tables
+%% than the plain LaTeX2e tabular which is used here.
+%\begin{tabular}{|c||c|}
+%\hline
+%One & Two\\
+%\hline
+%Three & Four\\
+%\hline
+%\end{tabular}
+%\end{table}
+
+
+% Note that the IEEE does not put floats in the very first column
+% - or typically anywhere on the first page for that matter. Also,
+% in-text middle ("here") positioning is typically not used, but it
+% is allowed and encouraged for Computer Society conferences (but
+% not Computer Society journals). Most IEEE journals/conferences use
+% top floats exclusively. 
+% Note that, LaTeX2e, unlike IEEE journals/conferences, places
+% footnotes above bottom floats. This can be corrected via the
+% \fnbelowfloat command of the stfloats package.

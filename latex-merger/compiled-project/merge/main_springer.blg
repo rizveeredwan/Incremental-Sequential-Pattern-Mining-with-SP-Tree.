@@ -1,0 +1,48 @@
+This is BibTeX, Version 0.99d
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: main_springer.aux
+Reallocating 'name_of_file' (item size: 1) to 6 items.
+The style file: abbrv.bst
+Reallocating 'name_of_file' (item size: 1) to 16 items.
+Database file #1: sn-bibliography.bib
+You've used 38 entries,
+            2118 wiz_defined-function locations,
+            728 strings with 10473 characters,
+and the built_in function-call counts, 15784 in all, are:
+= -- 1604
+> -- 765
+< -- 15
++ -- 310
+- -- 262
+* -- 1178
+:= -- 2513
+add.period$ -- 124
+call.type$ -- 38
+change.case$ -- 245
+chr.to.int$ -- 0
+cite$ -- 38
+duplicate$ -- 574
+empty$ -- 1185
+format.name$ -- 262
+if$ -- 3339
+int.to.chr$ -- 0
+int.to.str$ -- 38
+missing$ -- 38
+newline$ -- 193
+num.names$ -- 76
+pop$ -- 242
+preamble$ -- 1
+purify$ -- 207
+quote$ -- 0
+skip$ -- 415
+stack$ -- 0
+substring$ -- 1159
+swap$ -- 165
+text.length$ -- 15
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 152
+warning$ -- 0
+while$ -- 162
+width$ -- 40
+write$ -- 429
